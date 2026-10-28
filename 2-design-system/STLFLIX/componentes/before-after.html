@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem fill. O vídeo continua visível. */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-body);
+        }
+        #ba-panel {
+          max-width: 1420px;
+        }
+        #ba-cols {
+          display: flex;
+          gap: 64px;
+        }
+        .ba-col {
+          flex: 1;
+        }
+        .ba-head {
+          font-family: var(--font-title);
+          font-size: 32px;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          margin-bottom: 22px;
+        }
+        #ba-head-old {
+          color: var(--no);
+        }
+        #ba-head-new {
+          color: var(--ok);
+        }
+        .ba-item {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          margin-bottom: 14px;
+        }
+        .ba-mark {
+          flex: 0 0 38px;
+          height: 38px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: var(--font-title);
+          font-size: 21px;
+          font-weight: 700;
+          color: #0d0e14;
+        }
+        .ba-col-old .ba-mark {
+          background: var(--no);
+        }
+        .ba-col-new .ba-mark {
+          background: var(--ok);
+        }
+        .ba-text {
+          flex: 1;
+          font-size: 34px;
+          font-weight: 600;
+          color: var(--text);
+          line-height: 1.24;
+        }
+        #ba-anchor-phrase {
+          margin-top: 24px;
+          padding-top: 24px;
+          border-top: 2px solid rgba(246, 250, 254, 0.14);
+          font-family: var(--font-title);
+          font-size: 46px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          color: var(--text);
+          line-height: 1.16;
+        }
+      </style>
+
+      <div id="root" data-composition-id="before-after" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="ba-anchor">
+          <div class="hf-bar" id="ba-bar"></div>
+          <div class="hf-panel" id="ba-panel">
+            <div id="ba-cols">
+              <div class="ba-col ba-col-old" id="ba-col-old">
+                <div class="ba-head" id="ba-head-old">Antes</div>
+                <div class="ba-item" id="ba-old-1">
+                  <div class="ba-mark">✕</div>
+                  <div class="ba-text">Nivelar a mesa na mão</div>
+                </div>
+                <div class="ba-item" id="ba-old-2">
+                  <div class="ba-mark">✕</div>
+                  <div class="ba-text">Testar temperatura na raça</div>
+                </div>
+                <div class="ba-item" id="ba-old-3">
+                  <div class="ba-mark">✕</div>
+                  <div class="ba-text">Torcer pro filamento aderir</div>
+                </div>
+              </div>
+
+              <div class="ba-col ba-col-new" id="ba-col-new">
+                <div class="ba-head" id="ba-head-new">Hoje</div>
+                <div class="ba-item" id="ba-new-1">
+                  <div class="ba-mark">✓</div>
+                  <div class="ba-text">Nivelamento automático</div>
+                </div>
+                <div class="ba-item" id="ba-new-2">
+                  <div class="ba-mark">✓</div>
+                  <div class="ba-text">Calibração inteligente</div>
+                </div>
+                <div class="ba-item" id="ba-new-3">
+                  <div class="ba-mark">✓</div>
+                  <div class="ba-text">Alta velocidade, sem perder qualidade</div>
+                </div>
+              </div>
+            </div>
+
+            <div id="ba-anchor-phrase">Você não precisa mais entender de eletrônica nem de mecânica</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+
+          tl.fromTo("#ba-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#ba-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+
+          tl.fromTo("#ba-head-old", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, 0.3);
+          ["#ba-old-1", "#ba-old-2", "#ba-old-3"].forEach((sel, i) => {
+            tl.fromTo(sel, { opacity: 0, x: -22 }, { opacity: 1, x: 0, duration: 0.38, ease: "power3.out" }, 0.55 + i * 0.5);
+          });
+
+          // A virada: "aí as impressoras modernas chegaram"
+          tl.to("#ba-col-old", { opacity: 0.3, duration: 0.5, ease: "power2.inOut" }, 2.5);
+
+          tl.fromTo("#ba-head-new", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, 2.6);
+          ["#ba-new-1", "#ba-new-2", "#ba-new-3"].forEach((sel, i) => {
+            tl.fromTo(sel, { opacity: 0, x: 22 }, { opacity: 1, x: 0, duration: 0.38, ease: "power3.out" }, 2.85 + i * 0.5);
+          });
+
+          tl.fromTo("#ba-anchor-phrase", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.48, ease: "power3.out" }, 4.5);
+
+          window.__timelines["before-after"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

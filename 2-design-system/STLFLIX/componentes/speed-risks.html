@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem scrim */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-body);
+        }
+        #sr-panel {
+          max-width: 1320px;
+        }
+        #sr-chips {
+          display: flex;
+          gap: 40px;
+          margin-bottom: 24px;
+        }
+        .sr-chip {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+        }
+        .sr-down {
+          font-family: var(--font-title);
+          font-size: 34px;
+          font-weight: 700;
+          color: var(--no);
+          line-height: 1;
+          display: block;
+        }
+        .sr-chip-t {
+          font-size: 38px;
+          font-weight: 600;
+          color: var(--text);
+        }
+        #sr-compare {
+          display: flex;
+          gap: 70px;
+          padding-top: 24px;
+          border-top: 2px solid rgba(246, 250, 254, 0.14);
+        }
+        .sr-case {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+        }
+        .sr-svg {
+          width: 360px;
+          height: 130px;
+          display: block;
+        }
+        .sr-case-label {
+          font-family: var(--font-title);
+          font-size: 32px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+        }
+        #sr-label-ok {
+          color: var(--ok);
+        }
+        #sr-label-bad {
+          color: var(--no);
+        }
+        .sr-case-sub {
+          font-size: 26px;
+          font-weight: 600;
+          color: var(--text-dim);
+        }
+      </style>
+
+      <div id="root" data-composition-id="speed-risks" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="sr-anchor">
+          <div class="hf-bar" id="sr-bar"></div>
+          <div class="hf-panel" id="sr-panel">
+            <div id="sr-chips">
+              <div class="sr-chip" id="sr-chip-1">
+                <span class="sr-down">↓</span><span class="sr-chip-t">Acabamento</span>
+              </div>
+              <div class="sr-chip" id="sr-chip-2">
+                <span class="sr-down">↓</span><span class="sr-chip-t">Resistência</span>
+              </div>
+              <div class="sr-chip" id="sr-chip-3">
+                <span class="sr-down">↓</span><span class="sr-chip-t">Precisão</span>
+              </div>
+            </div>
+
+            <div id="sr-compare">
+              <div class="sr-case" id="sr-case-ok">
+                <svg class="sr-svg" viewBox="0 0 360 130" fill="none" aria-hidden="true">
+                  <path
+                    id="sr-path-ok"
+                    d="M18 108 C 18 40, 104 18, 180 18 C 256 18, 342 40, 342 108"
+                    stroke="#3DDC84"
+                    stroke-width="10"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                <div class="sr-case-label" id="sr-label-ok">Velocidade calibrada</div>
+                <div class="sr-case-sub">a curva sai limpa</div>
+              </div>
+
+              <div class="sr-case" id="sr-case-bad">
+                <svg class="sr-svg" viewBox="0 0 360 130" fill="none" aria-hidden="true">
+                  <path
+                    id="sr-path-bad"
+                    d="M18 108 C 18 40, 104 18, 180 18 C 256 18, 342 40, 342 108"
+                    stroke="#FF5C5C"
+                    stroke-width="10"
+                    stroke-linecap="round"
+                    stroke-dasharray="18 9"
+                  />
+                </svg>
+                <div class="sr-case-label" id="sr-label-bad">Máxima em tudo</div>
+                <div class="sr-case-sub">vibração e ondulação</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+
+          tl.fromTo("#sr-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#sr-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+
+          ["#sr-chip-1", "#sr-chip-2", "#sr-chip-3"].forEach((sel, i) => {
+            tl.fromTo(sel, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.38, ease: "power3.out" }, 0.3 + i * 0.42);
+          });
+
+          // Os dois traços se desenham: o limpo primeiro, depois o trêmulo
+          const drawIn = (sel, at) => {
+            const el = document.querySelector(sel);
+            const len = el.getTotalLength();
+            if (el.getAttribute("stroke-dasharray")) {
+              tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power2.out" }, at);
+              tl.fromTo(el, { strokeDashoffset: len }, { strokeDashoffset: 0, duration: 0.95, ease: "power2.inOut" }, at);
+            } else {
+              gsap.set(el, { strokeDasharray: len });
+              tl.fromTo(el, { strokeDashoffset: len }, { strokeDashoffset: 0, duration: 0.95, ease: "power2.inOut" }, at);
+            }
+          };
+
+          tl.fromTo("#sr-case-ok", { opacity: 0 }, { opacity: 1, duration: 0.32 }, 1.6);
+          drawIn("#sr-path-ok", 1.7);
+          tl.fromTo("#sr-case-bad", { opacity: 0 }, { opacity: 1, duration: 0.32 }, 2.4);
+          drawIn("#sr-path-bad", 2.5);
+
+          window.__timelines["speed-risks"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

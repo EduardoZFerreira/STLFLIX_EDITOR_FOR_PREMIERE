@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering discreto: sem scrim, canto inferior */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-body);
+        }
+        #cm-panel {
+          max-width: 900px;
+        }
+        #cm-q {
+          font-family: var(--font-title);
+          font-size: 52px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          color: var(--text);
+        }
+        #cm-hint {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          margin-top: 16px;
+          font-size: 28px;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: var(--text-dim);
+        }
+        #cm-arrow {
+          font-family: var(--font-title);
+          font-size: 32px;
+          font-weight: 700;
+          color: var(--accent);
+          line-height: 1;
+          display: block;
+        }
+      </style>
+
+      <div id="root" data-composition-id="comment-cta" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="cm-anchor">
+          <div class="hf-bar" id="cm-bar"></div>
+          <div class="hf-panel" id="cm-panel">
+            <div id="cm-q">Qual impressora comprar?</div>
+            <div id="cm-hint">
+              <span id="cm-arrow">↓</span>
+              <span>comenta aqui embaixo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+
+          tl.fromTo("#cm-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#cm-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+          tl.fromTo("#cm-q", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 0.28);
+          tl.fromTo("#cm-hint", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, 0.5);
+
+          // Seta pulsa em contagem finita — determinism-rules proíbe repeat:-1
+          tl.fromTo("#cm-arrow", { y: 0 }, { y: 9, duration: 0.42, ease: "sine.inOut", repeat: 5, yoyo: true }, 0.9);
+
+          tl.to("#cm-panel", { opacity: 0, x: -28, duration: 0.32, ease: "power2.in" }, 5.0);
+          tl.to("#cm-bar", { scaleY: 0, duration: 0.28, ease: "power2.in" }, 5.1);
+
+          window.__timelines["comment-cta"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

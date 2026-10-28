@@ -1,0 +1,103 @@
+<!doctype html>
+<html
+  lang="pt-BR"
+  data-composition-variables='[
+    {"id":"lead","type":"string","label":"Trecho neutro","default":"O universo que ela conhece"},
+    {"id":"punch","type":"string","label":"Trecho em gradiente","default":"pode não existir mais."}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem scrim. A fala e a impressora ficam visíveis. */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-title);
+        }
+        #ip-panel {
+          max-width: 1280px;
+        }
+        #ip-line {
+          font-size: 62px;
+          font-weight: 700;
+          line-height: 1.14;
+          letter-spacing: -0.025em;
+          color: var(--text);
+        }
+        .ip-w {
+          display: inline-block;
+        }
+        #ip-punch {
+          display: block;
+          margin-top: 6px;
+        }
+      </style>
+
+      <div id="root" data-composition-id="impact-phrase" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="ip-anchor">
+          <div class="hf-bar" id="ip-bar"></div>
+          <div class="hf-panel" id="ip-panel">
+            <div id="ip-line">
+              <span id="ip-lead"></span>
+              <span id="ip-punch" class="hf-grad"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+          const vars = window.__hyperframes.getVariables();
+
+          // Quebra em palavras: entrada palavra a palavra, design.md § Movimento
+          const split = (el, text) => {
+            el.textContent = "";
+            const out = [];
+            String(text)
+              .split(/\s+/)
+              .filter(Boolean)
+              .forEach((w) => {
+                const s = document.createElement("span");
+                s.className = "ip-w";
+                s.textContent = w;
+                el.appendChild(s);
+                el.appendChild(document.createTextNode(" "));
+                out.push(s);
+              });
+            return out;
+          };
+
+          const leadWords = split(document.getElementById("ip-lead"), vars.lead);
+
+          // O trecho em gradiente NÃO é quebrado em spans: `background-clip: text`
+          // é pintado no elemento pai, e um filho com camada própria se descola
+          // desse fundo e sai invisível.
+          const punchEl = document.getElementById("ip-punch");
+          punchEl.textContent = String(vars.punch);
+
+          tl.fromTo("#ip-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#ip-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+
+          tl.fromTo(
+            leadWords,
+            { opacity: 0, y: 16 },
+            { opacity: 1, y: 0, duration: 0.4, ease: "power3.out", stagger: 0.055 },
+            0.3
+          );
+
+          const punchAt = 0.3 + leadWords.length * 0.055 + 0.14;
+          tl.fromTo(punchEl, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.48, ease: "power3.out" }, punchAt);
+
+          window.__timelines["impact-phrase"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

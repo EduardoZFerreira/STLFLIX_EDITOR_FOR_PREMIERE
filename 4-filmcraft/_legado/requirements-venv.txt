@@ -1,0 +1,10 @@
+ctranslate2==4.8.3
+faster-whisper==1.2.1
+mediapipe==1.1.1
+numpy==2.5.4
+nvidia-cublas-cu12==12.9.2.10
+nvidia-cuda-nvrtc-cu12==12.9.86
+nvidia-cudnn-cu12==9.27.0.42
+opencv-contrib-python==5.0.0.93
+opencv-python==5.0.0.93
+scenedetect==0.7.2

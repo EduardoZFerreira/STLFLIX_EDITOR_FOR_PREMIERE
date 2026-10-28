@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem scrim */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-body);
+        }
+        #ss-panel {
+          width: 1220px;
+        }
+        #ss-labels {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 22px;
+        }
+        .ss-label {
+          width: 470px;
+        }
+        #ss-label-slow {
+          text-align: right;
+        }
+        .ss-kind {
+          display: block;
+          font-family: var(--font-title);
+          font-size: 38px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          margin-bottom: 4px;
+        }
+        #ss-label-fast .ss-kind {
+          color: var(--ok);
+        }
+        #ss-label-slow .ss-kind {
+          color: var(--no);
+        }
+        .ss-sub {
+          display: block;
+          font-size: 30px;
+          font-weight: 600;
+          color: var(--text-dim);
+        }
+        #ss-rail {
+          position: relative;
+          height: 22px;
+          border-radius: 11px;
+          background: linear-gradient(90deg, var(--ok) 0%, var(--accent) 52%, var(--no) 100%);
+        }
+        .ss-pin {
+          position: absolute;
+          top: -17px;
+          width: 56px;
+          height: 56px;
+          margin-left: -28px;
+          border-radius: 50%;
+          background: var(--surface);
+          border: 5px solid var(--text);
+        }
+        #ss-pin-fast {
+          left: 14%;
+        }
+        #ss-pin-slow {
+          left: 86%;
+        }
+        #ss-ends {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 26px;
+          font-size: 26px;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-dim);
+        }
+        #ss-note {
+          margin-top: 24px;
+          padding-top: 24px;
+          border-top: 2px solid rgba(246, 250, 254, 0.14);
+          font-family: var(--font-title);
+          font-size: 50px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          color: var(--text);
+        }
+      </style>
+
+      <div id="root" data-composition-id="speed-slider" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="ss-anchor">
+          <div class="hf-bar" id="ss-bar"></div>
+          <div class="hf-panel" id="ss-panel">
+            <div id="ss-labels">
+              <div class="ss-label" id="ss-label-fast">
+                <span class="ss-kind">Simples e lisa</span>
+                <span class="ss-sub">pode ir mais rápido</span>
+              </div>
+              <div class="ss-label" id="ss-label-slow">
+                <span class="ss-kind">Muito detalhe</span>
+                <span class="ss-sub">pede mais devagar</span>
+              </div>
+            </div>
+            <div id="ss-rail">
+              <div class="ss-pin" id="ss-pin-fast"></div>
+              <div class="ss-pin" id="ss-pin-slow"></div>
+            </div>
+            <div id="ss-ends">
+              <span>mais rápido</span>
+              <span>mais devagar</span>
+            </div>
+            <div id="ss-note">Calibre a velocidade para o tipo de peça.</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+
+          tl.fromTo("#ss-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#ss-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+
+          tl.fromTo("#ss-rail", { scaleX: 0 }, { scaleX: 1, duration: 0.55, ease: "power3.out", transformOrigin: "left center" }, 0.3);
+          tl.fromTo("#ss-ends", { opacity: 0 }, { opacity: 1, duration: 0.32 }, 0.65);
+
+          // Peça com detalhe primeiro — é a que ele explica
+          tl.fromTo("#ss-pin-slow", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.38, ease: "back.out(2.2)" }, 0.9);
+          tl.fromTo("#ss-label-slow", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.38, ease: "power3.out" }, 1.0);
+
+          tl.fromTo("#ss-pin-fast", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.38, ease: "back.out(2.2)" }, 1.6);
+          tl.fromTo("#ss-label-fast", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.38, ease: "power3.out" }, 1.7);
+
+          tl.fromTo("#ss-note", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.48, ease: "power3.out" }, 2.4);
+
+          window.__timelines["speed-slider"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

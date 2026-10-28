@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem scrim */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-title);
+        }
+        #cst-panel {
+          width: 1020px;
+        }
+        #cst-strip {
+          display: flex;
+          gap: 12px;
+          margin-bottom: 30px;
+        }
+        .cst-block {
+          flex: 1;
+          height: 110px;
+          border-radius: 14px;
+          transform-origin: bottom center;
+        }
+        #cst-b1 {
+          background: #22d3ee;
+        }
+        #cst-b2 {
+          background: #4f63e8;
+        }
+        #cst-b3 {
+          background: #b14cf0;
+        }
+        #cst-b4 {
+          background: var(--cta);
+        }
+        #cst-line {
+          font-size: 68px;
+          font-weight: 700;
+          line-height: 1.1;
+          letter-spacing: -0.03em;
+          color: var(--text);
+        }
+        #cst-punch {
+          display: block;
+          margin-top: 4px;
+        }
+      </style>
+
+      <div id="root" data-composition-id="color-strip" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="cst-anchor">
+          <div class="hf-bar" id="cst-bar"></div>
+          <div class="hf-panel" id="cst-panel">
+            <div id="cst-strip">
+              <div class="cst-block" id="cst-b1"></div>
+              <div class="cst-block" id="cst-b2"></div>
+              <div class="cst-block" id="cst-b3"></div>
+              <div class="cst-block" id="cst-b4"></div>
+            </div>
+            <div id="cst-line">
+              <span id="cst-lead">Lindas.</span>
+              <span id="cst-punch" class="hf-grad">Mas demoram.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+
+          tl.fromTo("#cst-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#cst-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+
+          // Os quatro blocos sobem em sequência — o apelo visual vem primeiro
+          ["#cst-b1", "#cst-b2", "#cst-b3", "#cst-b4"].forEach((sel, i) => {
+            tl.fromTo(sel, { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.42, ease: "power3.out" }, 0.3 + i * 0.15);
+          });
+
+          tl.fromTo("#cst-lead", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 1.1);
+          // ...e só depois a ressalva
+          tl.fromTo("#cst-punch", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.48, ease: "power3.out" }, 1.75);
+
+          window.__timelines["color-strip"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

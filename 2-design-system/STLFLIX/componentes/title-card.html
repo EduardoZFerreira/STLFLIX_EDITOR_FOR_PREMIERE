@@ -1,0 +1,88 @@
+<!doctype html>
+<html
+  lang="pt-BR"
+  data-composition-variables='[
+    {"id":"titleTop","type":"string","label":"Título — linha 1","default":"5 coisas sobre impressão 3D"},
+    {"id":"titleBottom","type":"string","label":"Título — linha 2 (gradiente)","default":"que quase ninguém fala"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-title);
+        }
+        #tc-center {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 30px;
+        }
+        #tc-top,
+        #tc-bottom {
+          font-size: 108px;
+          font-weight: 700;
+          line-height: 1.08;
+          letter-spacing: -0.035em;
+          text-align: center;
+        }
+        #tc-top {
+          color: var(--text);
+        }
+        #tc-logo {
+          margin-top: 34px;
+          width: 226px;
+          height: 60px;
+          display: block;
+        }
+        /* Brilho de fundo, puramente decorativo */
+        #tc-glow {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 1300px;
+          height: 1300px;
+          margin: -650px 0 0 -650px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(86, 101, 240, 0.22) 0%, rgba(86, 101, 240, 0) 62%);
+        }
+      </style>
+
+      <div id="root" data-composition-id="title-card" data-width="1920" data-height="1080">
+        <div class="hf-fill"></div>
+        <div id="tc-glow" data-layout-ignore></div>
+        <div id="tc-center">
+          <div id="tc-top" data-var-text="titleTop">5 coisas sobre impressão 3D</div>
+          <div id="tc-bottom" class="hf-grad" data-var-text="titleBottom">que quase ninguém fala</div>
+          <img id="tc-logo" src="assets/stlflix.svg" alt="STLFLIX" />
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+
+          tl.fromTo("#tc-glow", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 1.1, ease: "power2.out" }, 0);
+          tl.fromTo("#tc-top", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.12);
+          tl.fromTo("#tc-bottom", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.3);
+          // design.md: o logo não anima mais que fade/scale simples
+          tl.fromTo("#tc-logo", { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.55, ease: "power3.out" }, 0.62);
+
+          tl.to("#tc-center", { opacity: 0, duration: 0.3, ease: "power2.in" }, 5.3);
+
+          window.__timelines["title-card"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,0 +1,80 @@
+{
+  "nome": "VSL-EXEMPLO",
+  "filmcraft": {
+    "projeto": "C:\\caminho\\para\\VSL-EXEMPLO.fcproj"
+  },
+  "sequencias": {
+    "corpo": "Corpo decupado",
+    "lead-a": "Lead A"
+  },
+  "roteiro": "01-roteiro/teleprompter.txt",
+  "plano_de_cenas": "04-plano-de-cenas/plano-de-cenas.md",
+  "pastas": {
+    "motions": "05-motions",
+    "transcricoes": "06-transcricoes",
+    "exports": "07-exports"
+  },
+  "takes": {
+    "prefixo": "C23",
+    "escala": 114,
+    "ancora": [
+      1080,
+      1900
+    ]
+  },
+  "motions": {
+    "modelo": "shark-vsl",
+    "trilha": "V2",
+    "escala": 200,
+    "antecedencia_s": 0.2,
+    "fade_s": 0.5,
+    "folga_s": 0.1,
+    "minimo_s": 1.0,
+    "campanha": "bf26",
+    "faixa": {
+      "top": 130,
+      "height": 430
+    },
+    "referencia": "04-plano-de-cenas/referencia.png",
+    "hyperframes": "0.8.176"
+  },
+  "transcricao": {
+    "modelo": "large-v3-turbo",
+    "idioma": "pt",
+    "nomes": [
+      "STLFLIX",
+      "STLIA",
+      "STL Seller",
+      "STL Academy",
+      "Arena 3D",
+      "TikTok Shop",
+      "Shopee",
+      "Black November"
+    ],
+    "grafias": [
+      [
+        "\\bSt[ea]l+i?e?\\s?[Ff]li[xc]k?s?\\b|\\bSTL\\s?[Ff]lix\\b|\\bSTLFLIX\\b",
+        "STLflix"
+      ],
+      [
+        "\\bSTLA\\b|\\bSTL IA\\b",
+        "STLIA"
+      ],
+      [
+        "\\bSTL [Ss]eller\\b",
+        "STL Seller"
+      ]
+    ],
+    "sinonimos": {
+      "steliflix": "stlflix",
+      "stla": "stlia"
+    }
+  },
+  "blocos": {
+    "ancoras": {},
+    "versao_curta": false
+  },
+  "drive": {
+    "entrega_xml": ""
+  }
+}

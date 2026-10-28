@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem scrim */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-body);
+        }
+        #rd-panel {
+          max-width: 1240px;
+        }
+        #rd-head {
+          display: flex;
+          align-items: center;
+          gap: 34px;
+          margin-bottom: 22px;
+        }
+        #rd-ratio {
+          font-family: var(--font-title);
+          font-size: 110px;
+          font-weight: 700;
+          line-height: 0.92;
+          letter-spacing: -0.04em;
+          color: var(--accent);
+        }
+        #rd-dots {
+          display: flex;
+          gap: 14px;
+        }
+        .rd-dot {
+          width: 46px;
+          height: 46px;
+          border-radius: 50%;
+          background: var(--accent);
+        }
+        .rd-dot[data-empty="1"] {
+          background: transparent;
+          border: 4px solid var(--text-dim);
+        }
+        #rd-caption {
+          padding-top: 24px;
+          border-top: 2px solid rgba(246, 250, 254, 0.14);
+          font-family: var(--font-title);
+          font-size: 50px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          color: var(--text);
+        }
+      </style>
+
+      <div id="root" data-composition-id="ratio-dots" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="rd-anchor">
+          <div class="hf-bar" id="rd-bar"></div>
+          <div class="hf-panel" id="rd-panel">
+            <div id="rd-head">
+              <div id="rd-ratio">9/10</div>
+              <div id="rd-dots"></div>
+            </div>
+            <div id="rd-caption">Antes de culpar a máquina, cheque as configurações.</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+          const dots = document.getElementById("rd-dots");
+          const nodes = [];
+
+          for (let i = 0; i < 10; i++) {
+            const d = document.createElement("div");
+            d.className = "rd-dot";
+            d.id = "rd-dot-" + (i + 1);
+            // o décimo fica vazio: é a exceção
+            if (i === 9) d.setAttribute("data-empty", "1");
+            dots.appendChild(d);
+            nodes.push(d);
+          }
+
+          tl.fromTo("#rd-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#rd-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+          tl.fromTo("#rd-ratio", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.45, ease: "power3.out" }, 0.28);
+
+          // Os nove preenchem em sequência; o décimo entra à parte
+          nodes.slice(0, 9).forEach((n, i) => {
+            tl.fromTo(n, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.24, ease: "back.out(2.4)" }, 0.6 + i * 0.12);
+          });
+          tl.fromTo(nodes[9], { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power3.out" }, 0.6 + 9 * 0.12 + 0.18);
+
+          tl.fromTo("#rd-caption", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.48, ease: "power3.out" }, 2.2);
+
+          window.__timelines["ratio-dots"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,0 +1,160 @@
+/* STLFLIX — tokens de design
+   Origem: design.md. [exato] = lido do logo · [est.] = estimado dos prints. */
+
+@font-face {
+  font-family: "Sora";
+  src: url("fonts/sora-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Sora";
+  src: url("fonts/sora-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("fonts/inter-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("fonts/inter-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("fonts/inter-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  /* Cores — design.md § Cores */
+  --bg: #0d0e14;
+  --bg-navy: #06092b;
+  --surface: #15161e;
+  --text: #f6fafe;
+  --text-dim: #9a9cab;
+  --accent: #5665f0;
+  --logo-a: #3947a1;
+  --logo-b: #68adf7;
+  --cta: #b8f23c;
+  --ok: #3ddc84;
+  --no: #ff5c5c;
+
+  /* Gradiente de título — usar em 1 palavra-chave por cena, no máximo */
+  --grad-title: linear-gradient(90deg, #22d3ee 0%, #4f63e8 50%, #b14cf0 100%);
+  --grad-logo: linear-gradient(135deg, var(--logo-b) 0%, var(--logo-a) 100%);
+
+  /* Tipografia — escala para 1080p, design.md § Tipografia */
+  --font-title: "Sora", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --fs-chapter: 104px;
+  --fs-impact: 80px;
+  --fs-body: 44px;
+  --fs-caption: 32px;
+
+  /* Forma — design.md § Linguagem visual */
+  --radius: 28px;
+  --radius-chip: 999px;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* Preenchimento de cena cheia [FULL].
+   Fica num filho full-bleed, não na raiz, para o render com alpha
+   manter as cenas [OV] transparentes.
+   Usado só nos blocos A e Z (abertura e fecho). */
+.hf-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+}
+
+/* ─── Lettering dos blocos 1–5 ───────────────────────────────────────
+   Mesmo tratamento do lower third: barra de destaque + painel
+   translúcido. Sem fill e sem scrim, para a fala e as interações do
+   Thales continuarem visíveis.
+
+   Faixa segura: ancorado embaixo à esquerda, altura máxima ~44% do
+   quadro. Os dois terços superiores ficam livres para o rosto e para
+   a impressora quando ele aponta (plano-de-cenas.md § Pistas do bruto). */
+.hf-anchor {
+  position: absolute;
+  left: 120px;
+  bottom: 120px;
+  display: flex;
+  align-items: stretch;
+  gap: 26px;
+  max-width: 1420px;
+}
+
+.hf-bar {
+  flex: 0 0 10px;
+  width: 10px;
+  border-radius: 5px;
+  background: var(--accent);
+  transform-origin: bottom center;
+}
+
+.hf-panel {
+  background: rgba(21, 22, 30, 0.92);
+  border-radius: var(--radius);
+  padding: 30px 46px;
+  box-shadow: var(--shadow);
+}
+
+/* Linha de item dentro do painel */
+.hf-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-family: var(--font-body);
+  font-size: 40px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.hf-mark {
+  flex: 0 0 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-title);
+  font-size: 24px;
+  font-weight: 700;
+  color: #0d0e14;
+}
+
+.hf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 36px;
+  border-radius: var(--radius-chip);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  box-shadow: var(--shadow);
+}
+
+/* Palavra-chave em gradiente. Bloco para o transform ser seguro. */
+.hf-grad {
+  display: inline-block;
+  background: var(--grad-title);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

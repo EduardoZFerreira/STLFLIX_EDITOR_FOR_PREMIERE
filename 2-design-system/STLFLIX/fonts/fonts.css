@@ -1,0 +1,16 @@
+/* Fontes da marca STLFLIX.
+   Oficiais desde 2026-10-14 (design system sherecks/stlflix-design-system): Sora (títulos) + Inter (texto).
+   Nas composições, use <link rel="stylesheet" href="assets/tokens.css" /> dentro do <template>: ele já declara estas fontes e os tokens. */
+
+/* ── Oficiais ─────────────────────────────────────────── */
+@font-face { font-family: "Sora"; src: url("sora-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "Sora"; src: url("sora-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: block; }
+@font-face { font-family: "Inter"; src: url("inter-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "Inter"; src: url("inter-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: block; }
+@font-face { font-family: "Inter"; src: url("inter-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: block; }
+
+/* ── Versões anteriores (não usar em projetos novos) ──── */
+@font-face { font-family: "Montserrat"; src: url("Montserrat/Montserrat-VariableFont_wght.ttf") format("truetype"); font-weight: 100 900; font-style: normal; font-display: block; }
+@font-face { font-family: "Montserrat"; src: url("Montserrat/Montserrat-Italic-VariableFont_wght.ttf") format("truetype"); font-weight: 100 900; font-style: italic; font-display: block; }
+@font-face { font-family: "Lexend"; src: url("Lexend/Lexend-VariableFont_wght.ttf") format("truetype"); font-weight: 100 900; font-style: normal; font-display: block; }
+@font-face { font-family: "Space Grotesk"; src: url("SpaceGrotesk/SpaceGrotesk-VariableFont_wght.ttf") format("truetype"); font-weight: 300 700; font-style: normal; font-display: block; }

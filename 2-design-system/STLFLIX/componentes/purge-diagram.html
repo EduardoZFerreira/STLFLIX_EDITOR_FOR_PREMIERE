@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem fill. Diagrama recompactado para a faixa segura. */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-body);
+        }
+        #pg-panel {
+          width: 1300px;
+        }
+        #pg-title {
+          font-family: var(--font-title);
+          font-size: 50px;
+          font-weight: 700;
+          letter-spacing: -0.025em;
+          color: var(--text);
+          margin-bottom: 26px;
+        }
+        #pg-stage {
+          position: relative;
+          height: 250px;
+        }
+        /* Filamento entrando por cima */
+        #pg-feed {
+          position: absolute;
+          left: 143px;
+          top: 0;
+          width: 16px;
+          height: 62px;
+          border-radius: 8px;
+          background: #22d3ee;
+        }
+        /* Bico */
+        #pg-nozzle {
+          position: absolute;
+          left: 112px;
+          top: 62px;
+          width: 78px;
+          height: 66px;
+          background: rgba(246, 250, 254, 0.1);
+          clip-path: polygon(0 0, 100% 0, 68% 100%, 32% 100%);
+        }
+        #pg-nozzle-label {
+          position: absolute;
+          left: 0;
+          top: 80px;
+          width: 96px;
+          text-align: right;
+          font-size: 26px;
+          font-weight: 600;
+          color: var(--text-dim);
+        }
+        /* Blob de purga que sai do bico */
+        .pg-blob {
+          position: absolute;
+          left: 139px;
+          top: 126px;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+        }
+        /* Peça sendo impressa */
+        #pg-part-zone {
+          position: absolute;
+          left: 60px;
+          top: 150px;
+          width: 200px;
+          height: 74px;
+        }
+        .pg-layer {
+          position: absolute;
+          left: 20px;
+          width: 160px;
+          height: 22px;
+          border-radius: 5px;
+          transform-origin: left center;
+        }
+        #pg-part-label {
+          position: absolute;
+          left: 60px;
+          top: 228px;
+          width: 200px;
+          text-align: center;
+          font-size: 26px;
+          font-weight: 600;
+          color: var(--text-dim);
+        }
+        /* Pilha de descarte */
+        #pg-waste-zone {
+          position: absolute;
+          left: 720px;
+          top: 150px;
+          width: 340px;
+          height: 74px;
+        }
+        #pg-waste-floor {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: 5px;
+          border-radius: 3px;
+          background: var(--text-dim);
+          opacity: 0.4;
+        }
+        .pg-waste-blob {
+          position: absolute;
+          bottom: 5px;
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+        }
+        #pg-waste-label {
+          position: absolute;
+          left: 720px;
+          top: 228px;
+          width: 340px;
+          text-align: center;
+          font-family: var(--font-title);
+          font-size: 36px;
+          font-weight: 700;
+          color: var(--no);
+        }
+        #pg-foot {
+          margin-top: 22px;
+          padding-top: 22px;
+          border-top: 2px solid rgba(246, 250, 254, 0.14);
+          font-family: var(--font-title);
+          font-size: 44px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          color: var(--text);
+        }
+      </style>
+
+      <div id="root" data-composition-id="purge-diagram" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="pg-anchor">
+          <div class="hf-bar" id="pg-bar"></div>
+          <div class="hf-panel" id="pg-panel">
+            <div id="pg-title">Toda troca de cor descarta filamento</div>
+
+            <div id="pg-stage">
+              <div id="pg-feed"></div>
+              <div id="pg-nozzle"></div>
+              <div id="pg-nozzle-label">bico</div>
+
+              <div id="pg-part-zone"></div>
+              <div id="pg-part-label">a peça</div>
+
+              <div id="pg-waste-zone">
+                <div id="pg-waste-floor"></div>
+              </div>
+              <div id="pg-waste-label">Purga</div>
+            </div>
+
+            <div id="pg-foot">material desperdiçado e horas a mais</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+          const COLORS = ["#22d3ee", "#4f63e8", "#b14cf0", "#b8f23c"];
+
+          const stage = document.getElementById("pg-stage");
+          const wasteZone = document.getElementById("pg-waste-zone");
+          const partZone = document.getElementById("pg-part-zone");
+
+          tl.fromTo("#pg-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#pg-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+          tl.fromTo("#pg-title", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 0.25);
+          tl.fromTo("#pg-nozzle", { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, 0.4);
+          tl.fromTo("#pg-nozzle-label", { opacity: 0 }, { opacity: 1, duration: 0.28 }, 0.55);
+          tl.fromTo("#pg-feed", { opacity: 0, scaleY: 0 }, { opacity: 1, scaleY: 1, duration: 0.36, ease: "power3.out", transformOrigin: "top center" }, 0.48);
+          tl.fromTo("#pg-part-label", { opacity: 0 }, { opacity: 1, duration: 0.28 }, 0.65);
+          tl.fromTo("#pg-waste-floor", { opacity: 0, scaleX: 0 }, { opacity: 0.4, scaleX: 1, duration: 0.38, ease: "power3.out" }, 0.65);
+          tl.fromTo("#pg-waste-label", { opacity: 0 }, { opacity: 1, duration: 0.32 }, 0.85);
+
+          // Três ciclos de troca, cada um mais rápido: o ritmo comunica o acúmulo
+          const cycles = [
+            { at: 1.05, dur: 0.85 },
+            { at: 2.2, dur: 0.65 },
+            { at: 3.1, dur: 0.5 },
+          ];
+
+          cycles.forEach((cyc, i) => {
+            const from = COLORS[i];
+            const to = COLORS[i + 1];
+
+            // 1. o filamento novo empurra o antigo
+            tl.to("#pg-feed", { backgroundColor: to, duration: 0.2, ease: "none" }, cyc.at);
+
+            // 2. o resto da cor anterior é expelido em direção ao descarte
+            const blob = document.createElement("div");
+            blob.className = "pg-blob";
+            blob.id = "pg-blob-" + (i + 1);
+            blob.style.backgroundColor = from;
+            blob.style.opacity = "0";
+            stage.appendChild(blob);
+
+            tl.set(blob, { opacity: 1 }, cyc.at + 0.1);
+            tl.fromTo(
+              blob,
+              { x: 0, y: 0, scale: 1 },
+              { x: 640, y: 62, scale: 2.1, duration: cyc.dur, ease: "power1.in" },
+              cyc.at + 0.1
+            );
+            tl.set(blob, { opacity: 0 }, cyc.at + 0.1 + cyc.dur);
+
+            // 3. a pilha de descarte cresce
+            const w = document.createElement("div");
+            w.className = "pg-waste-blob";
+            w.id = "pg-waste-blob-" + (i + 1);
+            w.style.backgroundColor = from;
+            w.style.left = 42 + i * 84 + "px";
+            wasteZone.appendChild(w);
+            tl.fromTo(w, { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.28, ease: "back.out(2)" }, cyc.at + 0.1 + cyc.dur);
+
+            // 4. e a peça ganha só uma camada fina na cor nova
+            const layer = document.createElement("div");
+            layer.className = "pg-layer";
+            layer.id = "pg-layer-" + (i + 1);
+            layer.style.backgroundColor = to;
+            layer.style.bottom = 4 + i * 25 + "px";
+            partZone.appendChild(layer);
+            tl.fromTo(layer, { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.32, ease: "power3.out" }, cyc.at + 0.1 + cyc.dur + 0.08);
+          });
+
+          tl.fromTo("#pg-foot", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 4.1);
+
+          window.__timelines["purge-diagram"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

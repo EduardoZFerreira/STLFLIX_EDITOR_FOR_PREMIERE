@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem scrim */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-body);
+        }
+        #pa-panel {
+          display: flex;
+          align-items: center;
+          gap: 52px;
+          max-width: 1300px;
+        }
+        #pa-stage {
+          position: relative;
+          width: 260px;
+          height: 260px;
+          flex: 0 0 260px;
+        }
+        .pa-part {
+          position: absolute;
+          width: 122px;
+          height: 122px;
+        }
+        #pa-p1 {
+          left: 0;
+          top: 0;
+          background: #22d3ee;
+          border-radius: 20px 6px 6px 6px;
+        }
+        #pa-p2 {
+          left: 138px;
+          top: 0;
+          background: #4f63e8;
+          border-radius: 6px 20px 6px 6px;
+        }
+        #pa-p3 {
+          left: 0;
+          top: 138px;
+          background: #b14cf0;
+          border-radius: 6px 6px 6px 20px;
+        }
+        #pa-p4 {
+          left: 138px;
+          top: 138px;
+          background: var(--cta);
+          border-radius: 6px 6px 20px 6px;
+        }
+        .pa-note {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          font-size: 36px;
+          font-weight: 600;
+          color: var(--text);
+          margin-bottom: 16px;
+        }
+        .pa-tick {
+          flex: 0 0 38px;
+          height: 38px;
+          border-radius: 50%;
+          background: var(--ok);
+          color: #0d0e14;
+          font-family: var(--font-title);
+          font-size: 21px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        #pa-close {
+          margin-top: 22px;
+          padding-top: 22px;
+          border-top: 2px solid rgba(246, 250, 254, 0.14);
+          font-family: var(--font-title);
+          font-size: 52px;
+          font-weight: 700;
+          letter-spacing: -0.025em;
+          color: var(--text);
+        }
+      </style>
+
+      <div id="root" data-composition-id="parts-assembly" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="pa-anchor">
+          <div class="hf-bar" id="pa-bar"></div>
+          <div class="hf-panel" id="pa-panel">
+            <div id="pa-stage">
+              <div class="pa-part" id="pa-p1"></div>
+              <div class="pa-part" id="pa-p2"></div>
+              <div class="pa-part" id="pa-p3"></div>
+              <div class="pa-part" id="pa-p4"></div>
+            </div>
+
+            <div id="pa-text">
+              <div class="pa-note" id="pa-note-1">
+                <div class="pa-tick">✓</div>
+                <div>Sistemas mais modernos reduzem o desperdício</div>
+              </div>
+              <div class="pa-note" id="pa-note-2">
+                <div class="pa-tick">✓</div>
+                <div>Ou imprima por partes e monte depois</div>
+              </div>
+              <div id="pa-close">Expectativa certa.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+
+          tl.fromTo("#pa-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#pa-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+
+          // Cada parte é impressa na sua cor, separada...
+          const spread = [
+            { sel: "#pa-p1", x: -30, y: -18 },
+            { sel: "#pa-p2", x: 30, y: -18 },
+            { sel: "#pa-p3", x: -30, y: 18 },
+            { sel: "#pa-p4", x: 30, y: 18 },
+          ];
+          spread.forEach((p, i) => {
+            tl.fromTo(
+              p.sel,
+              { opacity: 0, x: p.x, y: p.y, scale: 0.86 },
+              { opacity: 1, x: p.x, y: p.y, scale: 0.86, duration: 0.34, ease: "power3.out" },
+              0.3 + i * 0.24
+            );
+          });
+
+          // ...e depois se encaixam
+          spread.forEach((p, i) => {
+            tl.to(p.sel, { x: 0, y: 0, scale: 1, duration: 0.55, ease: "power3.inOut" }, 1.55 + i * 0.08);
+          });
+
+          tl.fromTo("#pa-note-1", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 2.4);
+          tl.fromTo("#pa-note-2", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 2.75);
+          tl.fromTo("#pa-close", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.48, ease: "power3.out" }, 3.3);
+
+          window.__timelines["parts-assembly"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

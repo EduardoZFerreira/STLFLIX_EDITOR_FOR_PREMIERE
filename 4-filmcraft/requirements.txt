@@ -1,0 +1,4 @@
+# Ambiente Python do STLFLIX_EDITOR (Python 3.12). O instalador cria .venv na raiz do kit e instala este pacote:
+#   pip install -e 4-filmcraft          (sem GPU)
+#   pip install -e 4-filmcraft[gpu]     (com placa NVIDIA: transcrição bem mais rápida)
+-e .

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem fill */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-title);
+        }
+        #tb-panel {
+          width: 1260px;
+        }
+        .tb-row {
+          margin-bottom: 26px;
+        }
+        .tb-label {
+          font-family: var(--font-body);
+          font-size: 32px;
+          font-weight: 600;
+          color: var(--text-dim);
+          margin-bottom: 10px;
+        }
+        .tb-track {
+          display: flex;
+          align-items: center;
+          gap: 26px;
+        }
+        .tb-bar {
+          height: 42px;
+          border-radius: 10px;
+          transform-origin: left center;
+        }
+        #tb-bar-1 {
+          width: 210px;
+          background: var(--accent);
+        }
+        #tb-bar-4 {
+          width: 880px;
+          background: linear-gradient(90deg, var(--logo-b) 0%, #b14cf0 100%);
+        }
+        .tb-time {
+          font-size: 44px;
+          font-weight: 700;
+          color: var(--text);
+          white-space: nowrap;
+        }
+        #tb-foot {
+          padding-top: 22px;
+          border-top: 2px solid rgba(246, 250, 254, 0.14);
+          font-family: var(--font-body);
+          font-size: 30px;
+          color: var(--text-dim);
+        }
+      </style>
+
+      <div id="root" data-composition-id="time-bars" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="tb-anchor">
+          <div class="hf-bar" id="tb-bar"></div>
+          <div class="hf-panel" id="tb-panel">
+            <div class="tb-row">
+              <div class="tb-label">1 cor</div>
+              <div class="tb-track">
+                <div class="tb-bar" id="tb-bar-1"></div>
+                <div class="tb-time" id="tb-time-1">3 h</div>
+              </div>
+            </div>
+
+            <div class="tb-row">
+              <div class="tb-label">4 cores</div>
+              <div class="tb-track">
+                <div class="tb-bar" id="tb-bar-4"></div>
+                <div class="tb-time" id="tb-time-4">12–14 h</div>
+              </div>
+            </div>
+
+            <div id="tb-foot">a purga entre trocas de filamento adiciona horas</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+
+          tl.fromTo("#tb-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#tb-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+
+          // Barra curta: rápida
+          tl.fromTo("#tb-bar-1", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out" }, 0.35);
+          tl.fromTo("#tb-time-1", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.68);
+
+          // Barra longa: propositalmente demorada — a duração É a mensagem
+          tl.fromTo("#tb-bar-4", { scaleX: 0 }, { scaleX: 1, duration: 2.0, ease: "power1.inOut" }, 1.2);
+          tl.fromTo("#tb-time-4", { opacity: 0 }, { opacity: 1, duration: 0.35 }, 2.9);
+
+          tl.fromTo("#tb-foot", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 3.3);
+
+          window.__timelines["time-bars"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

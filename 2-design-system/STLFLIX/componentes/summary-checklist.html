@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-title);
+        }
+        #sc-wrap {
+          position: absolute;
+          left: 220px;
+          right: 220px;
+          top: 50%;
+          margin-top: -330px;
+        }
+        #sc-title {
+          font-size: 68px;
+          font-weight: 700;
+          letter-spacing: -0.025em;
+          color: var(--text);
+          margin-bottom: 56px;
+        }
+        .sc-item {
+          display: flex;
+          align-items: center;
+          gap: 32px;
+          margin-bottom: 30px;
+        }
+        .sc-num {
+          flex: 0 0 76px;
+          font-size: 60px;
+          font-weight: 700;
+          color: var(--accent);
+          text-align: right;
+          letter-spacing: -0.03em;
+        }
+        .sc-text {
+          flex: 1;
+          font-family: var(--font-body);
+          font-size: 46px;
+          font-weight: 600;
+          color: var(--text);
+        }
+        .sc-check {
+          flex: 0 0 64px;
+          height: 64px;
+          border-radius: 50%;
+          background: var(--ok);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .sc-check svg {
+          width: 34px;
+          height: 34px;
+        }
+      </style>
+
+      <div id="root" data-composition-id="summary-checklist" data-width="1920" data-height="1080">
+        <div class="hf-fill"></div>
+        <div id="sc-wrap">
+          <div id="sc-title">Resumindo</div>
+          <div id="sc-list"></div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+          const items = [
+            "As máquinas mudaram",
+            "Não precisa saber modelar",
+            "Quase sempre é configuração",
+            "Velocidade tem limite",
+            "Multicolor pede paciência",
+          ];
+
+          const list = document.getElementById("sc-list");
+          const rows = [];
+          const checks = [];
+
+          items.forEach((label, i) => {
+            const row = document.createElement("div");
+            row.className = "sc-item";
+            row.id = "sc-item-" + (i + 1);
+
+            const num = document.createElement("div");
+            num.className = "sc-num";
+            num.textContent = String(i + 1);
+
+            const txt = document.createElement("div");
+            txt.className = "sc-text";
+            txt.textContent = label;
+
+            const chk = document.createElement("div");
+            chk.className = "sc-check";
+            chk.id = "sc-check-" + (i + 1);
+            chk.innerHTML =
+              '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+              '<path d="M4 12.5l5.5 5.5L20 7" stroke="#0D0E14" stroke-width="3.4" ' +
+              'stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+            row.appendChild(num);
+            row.appendChild(txt);
+            row.appendChild(chk);
+            list.appendChild(row);
+            rows.push(row);
+            checks.push(chk);
+          });
+
+          tl.fromTo("#sc-title", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 0);
+
+          // Cada item entra e só depois marca — na fala, o ✓ cai na palavra correspondente
+          rows.forEach((row, i) => {
+            const at = 0.5 + i * 0.85;
+            tl.fromTo(row, { opacity: 0, x: -28 }, { opacity: 1, x: 0, duration: 0.42, ease: "power3.out" }, at);
+            tl.fromTo(
+              checks[i],
+              { scale: 0, opacity: 0 },
+              { scale: 1, opacity: 1, duration: 0.34, ease: "back.out(2.2)" },
+              at + 0.3
+            );
+          });
+
+          window.__timelines["summary-checklist"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem fill */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-title);
+        }
+        #pc-panel {
+          max-width: 1180px;
+        }
+        #pc-myth {
+          display: flex;
+          gap: 48px;
+          align-items: center;
+          margin-bottom: 18px;
+        }
+        .pc-old {
+          position: relative;
+          font-size: 50px;
+          font-weight: 700;
+          color: var(--text-dim);
+          letter-spacing: -0.02em;
+        }
+        /* Risco: linha própria animada por scaleX, não text-decoration */
+        .pc-strike {
+          position: absolute;
+          left: -8px;
+          right: -8px;
+          top: 52%;
+          height: 6px;
+          border-radius: 3px;
+          background: var(--no);
+          transform-origin: left center;
+        }
+        #pc-big {
+          font-size: 150px;
+          font-weight: 700;
+          line-height: 1;
+          letter-spacing: -0.04em;
+          color: var(--accent);
+        }
+        #pc-sub {
+          font-family: var(--font-body);
+          font-size: 40px;
+          font-weight: 600;
+          color: var(--text);
+          margin-top: 10px;
+        }
+      </style>
+
+      <div id="root" data-composition-id="price-card" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="pc-anchor">
+          <div class="hf-bar" id="pc-bar"></div>
+          <div class="hf-panel" id="pc-panel">
+            <div id="pc-myth">
+              <div class="pc-old" id="pc-old-a">R$ 30.000<span class="pc-strike" id="pc-strike-a"></span></div>
+              <div class="pc-old" id="pc-old-b">R$ 50.000<span class="pc-strike" id="pc-strike-b"></span></div>
+            </div>
+            <div id="pc-big">R$ 0</div>
+            <div id="pc-sub">máquina boa de entrada</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+          const big = document.getElementById("pc-big");
+
+          // Formatação pt-BR sem depender do locale do runtime
+          const fmt = (n) => "R$ " + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+          tl.fromTo("#pc-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#pc-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+
+          tl.fromTo("#pc-old-a", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.38, ease: "power3.out" }, 0.3);
+          tl.fromTo("#pc-old-b", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.38, ease: "power3.out" }, 0.6);
+
+          tl.fromTo("#pc-strike-a", { scaleX: 0 }, { scaleX: 1, duration: 0.28, ease: "power2.inOut" }, 1.15);
+          tl.fromTo("#pc-strike-b", { scaleX: 0 }, { scaleX: 1, duration: 0.28, ease: "power2.inOut" }, 1.38);
+          tl.to("#pc-myth", { opacity: 0.4, duration: 0.4, ease: "power2.out" }, 1.75);
+
+          // Contagem crescente — dirigida pela timeline, portanto seekable
+          const counter = { v: 0 };
+          tl.fromTo(
+            counter,
+            { v: 0 },
+            {
+              v: 1400,
+              duration: 1.4,
+              ease: "power2.out",
+              onUpdate: () => {
+                big.textContent = fmt(counter.v);
+              },
+            },
+            1.95
+          );
+          tl.fromTo("#pc-big", { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.45, ease: "power3.out" }, 1.95);
+          tl.fromTo("#pc-sub", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 3.2);
+
+          window.__timelines["price-card"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

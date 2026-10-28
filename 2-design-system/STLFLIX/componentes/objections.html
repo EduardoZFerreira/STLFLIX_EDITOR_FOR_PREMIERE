@@ -1,0 +1,141 @@
+<!doctype html>
+<html
+  lang="pt-BR"
+  data-composition-variables='[
+    {"id":"items","type":"string","label":"Objeções (array JSON)","default":"[\"Não sei modelar\",\"Preciso aprender um software antes\",\"Não tenho esse dom\"]"},
+    {"id":"verdict","type":"string","label":"Frase de virada","default":"Não precisa de nada disso pra começar"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem scrim */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-body);
+        }
+        #ob-panel {
+          max-width: 1180px;
+        }
+        .ob-item {
+          position: relative;
+          display: block;
+          font-size: 42px;
+          font-weight: 600;
+          color: var(--text);
+          padding: 10px 0;
+        }
+        .ob-item-inner {
+          position: relative;
+          display: inline-block;
+        }
+        .ob-strike {
+          position: absolute;
+          left: -8px;
+          right: -8px;
+          top: 50%;
+          height: 6px;
+          margin-top: -3px;
+          border-radius: 3px;
+          background: var(--no);
+          transform-origin: left center;
+        }
+        #ob-verdict {
+          margin-top: 22px;
+          padding-top: 24px;
+          border-top: 2px solid rgba(246, 250, 254, 0.14);
+          font-family: var(--font-title);
+          font-size: 52px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          line-height: 1.14;
+          color: var(--text);
+        }
+      </style>
+
+      <div id="root" data-composition-id="objections" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="ob-anchor">
+          <div class="hf-bar" id="ob-bar"></div>
+          <div class="hf-panel" id="ob-panel">
+            <div id="ob-list"></div>
+            <div id="ob-verdict"></div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+          const vars = window.__hyperframes.getVariables();
+
+          let items = [];
+          try {
+            items = JSON.parse(vars.items);
+          } catch (e) {
+            items = String(vars.items || "").split("|").filter(Boolean);
+          }
+
+          const list = document.getElementById("ob-list");
+          const nodes = [];
+          const strikes = [];
+
+          items.forEach((label, i) => {
+            const row = document.createElement("div");
+            row.className = "ob-item";
+            row.id = "ob-item-" + (i + 1);
+
+            const inner = document.createElement("span");
+            inner.className = "ob-item-inner";
+            inner.textContent = '"' + label + '"';
+
+            const st = document.createElement("span");
+            st.className = "ob-strike";
+            st.id = "ob-strike-" + (i + 1);
+            inner.appendChild(st);
+
+            row.appendChild(inner);
+            list.appendChild(row);
+            nodes.push(row);
+            strikes.push(st);
+          });
+
+          const verdictEl = document.getElementById("ob-verdict");
+          verdictEl.textContent = String(vars.verdict || "");
+
+          tl.fromTo("#ob-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#ob-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+
+          nodes.forEach((n, i) => {
+            tl.fromTo(n, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 0.3 + i * 0.6);
+          });
+
+          // "não precisa de nada disso": riscadas em cascata
+          const strikeAt = 0.3 + nodes.length * 0.6 + 0.3;
+          strikes.forEach((s, i) => {
+            tl.fromTo(s, { scaleX: 0 }, { scaleX: 1, duration: 0.26, ease: "power2.inOut" }, strikeAt + i * 0.2);
+          });
+          nodes.forEach((n, i) => {
+            tl.to(n, { opacity: 0.32, duration: 0.3, ease: "power2.out" }, strikeAt + i * 0.2 + 0.28);
+          });
+
+          if (verdictEl.textContent) {
+            tl.fromTo(
+              verdictEl,
+              { opacity: 0, y: 20 },
+              { opacity: 1, y: 0, duration: 0.48, ease: "power3.out" },
+              strikeAt + nodes.length * 0.2 + 0.35
+            );
+          }
+
+          window.__timelines["objections"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

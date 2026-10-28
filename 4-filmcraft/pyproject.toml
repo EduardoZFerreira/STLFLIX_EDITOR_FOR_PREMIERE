@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stlflix-editor"
+version = "0.1.0"
+description = "Ferramentas de edição de VSL 9:16 da STLFLIX no FilmCraft"
+requires-python = ">=3.11"
+dependencies = ["numpy>=2.0", "faster-whisper>=1.2"]
+
+[project.optional-dependencies]
+gpu = ["nvidia-cublas-cu12", "nvidia-cudnn-cu12"]
+
+[project.scripts]
+stlflix = "stlflix.__main__:main"
+
+[tool.setuptools]
+packages = ["stlflix"]

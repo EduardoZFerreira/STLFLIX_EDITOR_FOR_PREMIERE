@@ -1,0 +1,213 @@
+<!doctype html>
+<html
+  lang="pt-BR"
+  data-composition-variables='[
+    {"id":"chips","type":"string","label":"Chips (array JSON)","default":"[\"linhas aparecendo\",\"acabamento grosseiro\",\"parecia experimento\"]"},
+    {"id":"footer","type":"string","label":"Frase fixa no rodapé (opcional)","default":""},
+    {"id":"tone","type":"enum","label":"Tratamento","default":"muted","options":[{"value":"muted","label":"Neutro / passado"},{"value":"bad","label":"Causa de erro"},{"value":"down","label":"Com seta para baixo"}]},
+    {"id":"layout","type":"enum","label":"Layout","default":"scrim","options":[{"value":"scrim","label":"Escurece o vídeo (bloco A)"},{"value":"panel","label":"Painel de lettering (blocos 1–5)"}]},
+    {"id":"scrim","type":"number","label":"Escurecimento do vídeo (0–1)","default":0.35,"min":0,"max":1,"step":0.05}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-body);
+          isolation: isolate;
+        }
+        #cs-scrim {
+          position: absolute;
+          inset: 0;
+          background: #000;
+          display: none;
+        }
+
+        /* --- layout "scrim": chips soltos sobre o vídeo escurecido --- */
+        #root[data-layout="scrim"] #cs-stack {
+          position: absolute;
+          left: 150px;
+          top: 50%;
+          margin-top: -220px;
+        }
+        #root[data-layout="scrim"] #cs-list {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 30px;
+        }
+        #root[data-layout="scrim"] .cs-chip {
+          padding: 22px 42px;
+          border-radius: var(--radius-chip);
+          background: var(--surface);
+          box-shadow: var(--shadow);
+        }
+        #root[data-layout="scrim"] #cs-footer {
+          margin-top: 60px;
+          max-width: 1300px;
+        }
+
+        /* --- layout "panel": lettering ancorado, sem escurecer o vídeo --- */
+        #root[data-layout="panel"] #cs-stack {
+          max-width: 1180px;
+        }
+        #root[data-layout="panel"] #cs-list {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 4px;
+        }
+        #root[data-layout="panel"] .cs-chip {
+          padding: 9px 0;
+        }
+        #root[data-layout="panel"] #cs-footer {
+          margin-top: 22px;
+          padding-top: 24px;
+          border-top: 2px solid rgba(246, 250, 254, 0.14);
+        }
+
+        .cs-chip {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          color: var(--text);
+          font-size: 42px;
+          font-weight: 600;
+        }
+        .cs-dot {
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: var(--text-dim);
+          flex: 0 0 18px;
+        }
+        .cs-chip[data-tone="bad"] .cs-dot {
+          background: var(--no);
+        }
+        .cs-arrow {
+          font-family: var(--font-title);
+          font-size: 40px;
+          font-weight: 700;
+          color: var(--no);
+          line-height: 1;
+        }
+        #cs-footer {
+          font-family: var(--font-title);
+          font-size: 52px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          color: var(--text);
+        }
+        #cs-footer:empty {
+          display: none;
+        }
+      </style>
+
+      <div id="root" data-composition-id="chips-sequence" data-width="1920" data-height="1080" data-layout="scrim">
+        <div id="cs-scrim"></div>
+        <div class="hf-anchor" id="cs-anchor">
+          <div class="hf-bar" id="cs-bar"></div>
+          <div class="hf-panel" id="cs-stack">
+            <div id="cs-list"></div>
+            <div id="cs-footer"></div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+          const vars = window.__hyperframes.getVariables();
+
+          let labels = [];
+          try {
+            labels = JSON.parse(vars.chips);
+          } catch (e) {
+            labels = String(vars.chips || "").split("|").filter(Boolean);
+          }
+
+          const tone = vars.tone || "muted";
+          const layout = vars.layout === "panel" ? "panel" : "scrim";
+          const root = document.getElementById("root");
+          const anchor = document.getElementById("cs-anchor");
+          const bar = document.getElementById("cs-bar");
+          const stack = document.getElementById("cs-stack");
+          const scrimEl = document.getElementById("cs-scrim");
+
+          root.setAttribute("data-layout", layout);
+
+          if (layout === "scrim") {
+            // Sem barra nem painel: os chips flutuam sobre o vídeo escurecido
+            anchor.classList.remove("hf-anchor");
+            bar.style.display = "none";
+            stack.classList.remove("hf-panel");
+            scrimEl.style.display = "block";
+          }
+
+          const list = document.getElementById("cs-list");
+          const nodes = [];
+
+          labels.forEach((label, i) => {
+            const chip = document.createElement("div");
+            chip.className = "cs-chip";
+            chip.id = "cs-chip-" + (i + 1);
+            chip.setAttribute("data-tone", tone);
+
+            if (tone === "down") {
+              const a = document.createElement("div");
+              a.className = "cs-arrow";
+              a.textContent = "↓";
+              chip.appendChild(a);
+            } else {
+              const d = document.createElement("div");
+              d.className = "cs-dot";
+              chip.appendChild(d);
+            }
+
+            const t = document.createElement("div");
+            t.textContent = label;
+            chip.appendChild(t);
+
+            list.appendChild(chip);
+            nodes.push(chip);
+          });
+
+          const footEl = document.getElementById("cs-footer");
+          const footText = String(vars.footer || "");
+          footEl.textContent = footText;
+
+          if (layout === "scrim") {
+            const scrimTo = typeof vars.scrim === "number" ? vars.scrim : 0.35;
+            tl.fromTo(scrimEl, { opacity: 0 }, { opacity: scrimTo, duration: 0.45, ease: "power2.out" }, 0);
+          } else {
+            tl.fromTo(bar, { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+            tl.fromTo(stack, { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+          }
+
+          const step = layout === "panel" ? 0.55 : 0.6;
+          nodes.forEach((n, i) => {
+            tl.fromTo(n, { opacity: 0, x: -28 }, { opacity: 1, x: 0, duration: 0.42, ease: "power3.out" }, 0.3 + i * step);
+          });
+
+          if (footText) {
+            tl.fromTo(
+              footEl,
+              { opacity: 0, y: 18 },
+              { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" },
+              0.3 + nodes.length * step + 0.2
+            );
+          }
+
+          window.__timelines["chips-sequence"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

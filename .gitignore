@@ -1,0 +1,30 @@
+# ambientes e dependências
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.egg-info/
+.claude/settings.local.json
+
+# mídia e saídas pesadas (ficam no Drive, não no Git)
+*.mp4
+*.mov
+*.MOV
+*.MP4
+*.wav
+*.mxf
+projetos/*/
+!projetos/_MODELO-VSL/
+projetos/_MODELO-VSL/02-brutos/*
+projetos/_MODELO-VSL/03-b-rolls/*
+projetos/_MODELO-VSL/05-motions/*
+projetos/_MODELO-VSL/06-transcricoes/*
+projetos/_MODELO-VSL/07-exports/*
+
+# gerado pelo stlflix painel
+painel/index.html
+
+# segredos locais
+control_token
+.env
+!projetos/_MODELO-VSL/*/.gitkeep

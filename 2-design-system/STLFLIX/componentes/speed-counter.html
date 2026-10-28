@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem scrim */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-body);
+        }
+        #sp-panel {
+          width: 1100px;
+        }
+        #sp-readout {
+          display: flex;
+          align-items: baseline;
+          gap: 18px;
+          margin-bottom: 26px;
+        }
+        #sp-value {
+          font-family: var(--font-title);
+          font-size: 130px;
+          font-weight: 700;
+          line-height: 0.92;
+          letter-spacing: -0.04em;
+          color: var(--accent);
+        }
+        #sp-unit {
+          font-family: var(--font-title);
+          font-size: 46px;
+          font-weight: 700;
+          color: var(--text);
+        }
+        #sp-track {
+          height: 26px;
+          border-radius: 13px;
+          background: rgba(246, 250, 254, 0.09);
+          overflow: hidden;
+        }
+        #sp-fill {
+          height: 100%;
+          width: 100%;
+          border-radius: 13px;
+          background: linear-gradient(90deg, var(--logo-b) 0%, var(--accent) 100%);
+          transform-origin: left center;
+        }
+        #sp-ticks {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 14px;
+          font-size: 28px;
+          font-weight: 600;
+          color: var(--text-dim);
+        }
+      </style>
+
+      <div id="root" data-composition-id="speed-counter" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="sp-anchor">
+          <div class="hf-bar" id="sp-bar"></div>
+          <div class="hf-panel" id="sp-panel">
+            <div id="sp-readout">
+              <div id="sp-value">0</div>
+              <div id="sp-unit">mm/s</div>
+            </div>
+            <div id="sp-track">
+              <div id="sp-fill"></div>
+            </div>
+            <div id="sp-ticks">
+              <span>0</span>
+              <span>300</span>
+              <span>400</span>
+              <span>500</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+          const value = document.getElementById("sp-value");
+          const counter = { v: 0 };
+          const MAX = 500;
+
+          const write = () => {
+            value.textContent = String(Math.round(counter.v));
+          };
+
+          tl.fromTo("#sp-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#sp-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+
+          // Três patamares, na ordem em que ele fala: 300 → 400 → 500
+          const steps = [
+            { to: 300, at: 0.35, dur: 0.85 },
+            { to: 400, at: 1.55, dur: 0.5 },
+            { to: 500, at: 2.35, dur: 0.5 },
+          ];
+
+          steps.forEach((s, i) => {
+            const from = i === 0 ? 0 : steps[i - 1].to;
+            tl.fromTo(counter, { v: from }, { v: s.to, duration: s.dur, ease: "power2.out", onUpdate: write }, s.at);
+            tl.fromTo("#sp-fill", { scaleX: from / MAX }, { scaleX: s.to / MAX, duration: s.dur, ease: "power2.out" }, s.at);
+          });
+
+          window.__timelines["speed-counter"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

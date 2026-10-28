@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem fill */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-body);
+        }
+        #rm-panel {
+          max-width: 1340px;
+        }
+        #rm-makers {
+          display: flex;
+          gap: 40px;
+          margin-bottom: 26px;
+        }
+        .rm-maker {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        .rm-icon {
+          width: 60px;
+          height: 60px;
+          border-radius: 16px;
+          background: rgba(246, 250, 254, 0.07);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 60px;
+        }
+        .rm-icon svg {
+          width: 32px;
+          height: 32px;
+        }
+        .rm-maker-label {
+          font-size: 32px;
+          font-weight: 600;
+          color: var(--text-dim);
+        }
+        #rm-steps {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+        }
+        .rm-step {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        .rm-step-n {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: var(--accent);
+          color: #0d0e14;
+          font-family: var(--font-title);
+          font-size: 25px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 44px;
+        }
+        .rm-step-t {
+          font-size: 36px;
+          font-weight: 600;
+          color: var(--text);
+          white-space: nowrap;
+        }
+        .rm-sep {
+          font-family: var(--font-title);
+          font-size: 36px;
+          font-weight: 700;
+          color: var(--accent);
+          line-height: 1;
+          display: block;
+        }
+        #rm-close {
+          margin-top: 24px;
+          padding-top: 24px;
+          border-top: 2px solid rgba(246, 250, 254, 0.14);
+          font-family: var(--font-title);
+          font-size: 52px;
+          font-weight: 700;
+          letter-spacing: -0.025em;
+          color: var(--text);
+        }
+      </style>
+
+      <div id="root" data-composition-id="ready-models-flow" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="rm-anchor">
+          <div class="hf-bar" id="rm-bar"></div>
+          <div class="hf-panel" id="rm-panel">
+            <div id="rm-makers">
+              <div class="rm-maker" id="rm-maker-1">
+                <div class="rm-icon">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M4 20l4-1 9.5-9.5a2.1 2.1 0 10-3-3L5 16l-1 4z" stroke="#68ADF7" stroke-width="1.8" stroke-linejoin="round" />
+                  </svg>
+                </div>
+                <div class="rm-maker-label">Designers</div>
+              </div>
+              <div class="rm-maker" id="rm-maker-2">
+                <div class="rm-icon">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 3l7.5 4.3v9.4L12 21l-7.5-4.3V7.3L12 3z" stroke="#5665F0" stroke-width="1.8" stroke-linejoin="round" />
+                    <circle cx="12" cy="12" r="3" stroke="#5665F0" stroke-width="1.8" />
+                  </svg>
+                </div>
+                <div class="rm-maker-label">Engenheiros</div>
+              </div>
+              <div class="rm-maker" id="rm-maker-3">
+                <div class="rm-icon">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="12" cy="12" r="8.5" stroke="#B14CF0" stroke-width="1.8" />
+                    <circle cx="9" cy="10" r="1.4" fill="#B14CF0" />
+                    <circle cx="15" cy="10" r="1.4" fill="#B14CF0" />
+                    <circle cx="12" cy="15" r="1.4" fill="#B14CF0" />
+                  </svg>
+                </div>
+                <div class="rm-maker-label">Artistas</div>
+              </div>
+            </div>
+
+            <div id="rm-steps">
+              <div class="rm-step" id="rm-step-1">
+                <div class="rm-step-n">1</div>
+                <div class="rm-step-t">Baixa</div>
+              </div>
+              <span class="rm-sep" id="rm-sep-1" data-layout-ignore>→</span>
+              <div class="rm-step" id="rm-step-2">
+                <div class="rm-step-n">2</div>
+                <div class="rm-step-t">Abre no software</div>
+              </div>
+              <span class="rm-sep" id="rm-sep-2" data-layout-ignore>→</span>
+              <div class="rm-step" id="rm-step-3">
+                <div class="rm-step-n">3</div>
+                <div class="rm-step-t">Imprime</div>
+              </div>
+            </div>
+
+            <div id="rm-close">Meses imprimindo sem criar 1 arquivo</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+
+          tl.fromTo("#rm-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#rm-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+
+          ["#rm-maker-1", "#rm-maker-2", "#rm-maker-3"].forEach((sel, i) => {
+            tl.fromTo(sel, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.38, ease: "power3.out" }, 0.3 + i * 0.35);
+          });
+
+          ["#rm-step-1", "#rm-sep-1", "#rm-step-2", "#rm-sep-2", "#rm-step-3"].forEach((sel, i) => {
+            tl.fromTo(sel, { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.34, ease: "power3.out" }, 1.5 + i * 0.3);
+          });
+
+          tl.fromTo("#rm-close", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.48, ease: "power3.out" }, 3.1);
+
+          window.__timelines["ready-models-flow"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

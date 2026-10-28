@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel do editor</title>
+<style>
+@font-face { font-family: "Sora"; src: url("../2-design-system/STLFLIX/fonts/sora-latin-700-normal.woff2") format("woff2"); font-weight: 700; }
+@font-face { font-family: "Inter"; src: url("../2-design-system/STLFLIX/fonts/inter-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+@font-face { font-family: "Inter"; src: url("../2-design-system/STLFLIX/fonts/inter-latin-600-normal.woff2") format("woff2"); font-weight: 600; }
+
+:root {
+  --bg: #0d0e14;
+  --surface: #15161e;
+  --surface-2: #1c1d28;
+  --line: #262838;
+  --text: #f6fafe;
+  --text-dim: #9a9cab;
+  --accent: #5665f0;
+  --accent-soft: rgba(86, 101, 240, .14);
+  --accent-text: #aab3ff;
+  --cta: #b8f23c;
+  --ok: #3ddc84;
+  --aviso: #f5b942;
+  --falta: #ff5c5c;
+  --info: #6b6e80;
+  --radius: 14px;
+  --grad: linear-gradient(90deg, #22d3ee 0%, #4f63e8 50%, #b14cf0 100%);
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 "Inter", system-ui, sans-serif; }
+main { max-width: 1040px; margin: 0 auto; padding: 0 16px 80px; }
+h1, h2, h3 { font-family: "Sora", "Inter", sans-serif; font-weight: 700; margin: 0; letter-spacing: -.01em; line-height: 1.25; }
+h2 { font-size: 26px; }
+h3 { font-size: 17px; }
+p { margin: 0 0 12px; }
+a { color: var(--accent-text); }
+code { font: 13.5px/1.4 ui-monospace, Consolas, monospace; background: var(--surface-2); padding: 1px 6px; border-radius: 6px; }
+.dim { color: var(--text-dim); }
+section.bloco { padding-top: 64px; }
+section.bloco > .intro { color: var(--text-dim); max-width: 680px; margin: 8px 0 24px; font-size: 16.5px; }
+
+/* topo */
+.topo { position: sticky; top: 0; z-index: 5; background: rgba(13,14,20,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.topo-in { max-width: 1040px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; gap: 16px; }
+.topo img { height: 24px; }
+.topo b { font-family: "Sora", sans-serif; }
+.topo nav { margin-left: auto; display: flex; gap: 18px; font-size: 14px; overflow-x: auto; }
+.topo nav a { color: var(--text-dim); text-decoration: none; white-space: nowrap; }
+.topo nav a:hover { color: var(--text); }
+
+/* boas-vindas */
+.hero { padding: 56px 0 8px; }
+.hero h1 { font-size: clamp(30px, 5vw, 44px); max-width: 760px; }
+.hero h1 em { font-style: normal; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero .lead { font-size: 18.5px; color: #c9cbd6; max-width: 720px; margin: 18px 0 32px; }
+.promessas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.promessa { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+.promessa .ico { font-size: 22px; line-height: 1; margin-bottom: 10px; }
+.promessa p { margin: 6px 0 0; color: var(--text-dim); font-size: 15px; }
+
+/* pedido copiável */
+.pedido { display: inline-flex; align-items: center; gap: 10px; background: var(--accent-soft); border: 1px solid rgba(86,101,240,.4);
+  border-radius: 10px; padding: 7px 7px 7px 14px; font-size: 15px; max-width: 100%; }
+.pedido span { overflow-wrap: anywhere; }
+.pedido span::before { content: "“"; color: var(--text-dim); }
+.pedido span::after { content: "”"; color: var(--text-dim); }
+.pedido button { flex: none; background: var(--accent); color: #fff; border: 0; border-radius: 7px; padding: 5px 11px; font: 600 12.5px "Inter", sans-serif; cursor: pointer; }
+.pedido button.copiado { background: var(--ok); color: #06210f; }
+
+/* começar */
+.comecar { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+.cartao { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+.cartao.destaque { border-color: rgba(184,242,60,.35); background: linear-gradient(180deg, rgba(184,242,60,.06), transparent 60%), var(--surface); }
+.rotulo { font: 600 11.5px "Inter", sans-serif; letter-spacing: .09em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+.destaque .rotulo { color: var(--cta); }
+.cartao h3 { margin-bottom: 8px; }
+.cartao ol, .cartao ul { margin: 8px 0 14px; padding-left: 20px; }
+.cartao li { margin: 4px 0; }
+.estado-pc { display: flex; gap: 10px; align-items: flex-start; }
+.estado-pc .grande { font-size: 22px; line-height: 1.2; }
+details.ferr-det summary { cursor: pointer; color: var(--accent-text); font-size: 14px; margin-top: 8px; }
+.ferramentas { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr)); gap: 8px; margin-top: 12px; }
+.ferr { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; display: flex; gap: 10px; font-size: 14px; }
+.ferr b { display: block; font-weight: 600; }
+.ferr small { color: var(--text-dim); font-size: 12.5px; overflow-wrap: anywhere; }
+.dot { flex: none; width: 10px; height: 10px; border-radius: 50%; margin-top: 7px; background: var(--info); }
+.ok > .dot { background: var(--ok); }
+.aviso > .dot { background: var(--aviso); }
+.falta > .dot { background: var(--falta); }
+
+/* conversa */
+.conversa-grade { display: grid; grid-template-columns: 1.1fr .9fr; gap: 24px; align-items: start; }
+.chat { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.chat .cab { font-size: 12.5px; color: var(--text-dim); border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 2px; }
+.msg { max-width: 88%; padding: 10px 14px; border-radius: 14px; font-size: 15px; }
+.msg.voce { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+.msg.claude { align-self: flex-start; background: var(--surface-2); border-bottom-left-radius: 4px; }
+.msg.claude b { color: var(--cta); font-weight: 600; }
+.msg .quem { display: block; font-size: 11.5px; font-weight: 600; opacity: .7; margin-bottom: 2px; }
+.dicas { display: grid; gap: 14px; }
+.dica { display: grid; grid-template-columns: 32px 1fr; gap: 0 12px; }
+.dica .ico { font-size: 20px; line-height: 1.4; }
+.dica > div > b { display: block; }
+.dica span { color: var(--text-dim); font-size: 15px; }
+
+/* caminho */
+.trilha { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 18px; }
+.trilha a { text-decoration: none; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 10px; font-size: 13.5px; font-weight: 600; line-height: 1.3; }
+.trilha a small { display: block; font-weight: 400; color: var(--text-dim); font-size: 12px; margin-top: 4px; }
+.trilha a .n { display: block; font: 700 13px "Sora", sans-serif; color: var(--accent-text); margin-bottom: 4px; }
+.passos { display: grid; gap: 12px; }
+.passo { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px; display: grid; grid-template-columns: 52px 1fr; gap: 0 16px; scroll-margin-top: 70px; }
+.passo .num { font: 700 28px "Sora", sans-serif; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1.1; }
+.passo h3 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 19px; margin-bottom: 8px; }
+.quem-faz { font: 600 12px "Inter", sans-serif; padding: 3px 10px; border-radius: 99px; }
+.quem-faz.voce { background: rgba(184,242,60,.14); color: var(--cta); }
+.quem-faz.claude { background: var(--accent-soft); color: var(--accent-text); }
+.quem-faz.juntos { background: rgba(245,185,66,.14); color: var(--aviso); }
+.passo .colunas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px; }
+.passo .colunas > div { background: var(--surface-2); border-radius: 12px; padding: 12px 14px; font-size: 14.5px; }
+.passo .colunas .rotulo { margin-bottom: 4px; }
+.passo .colunas p:last-child { margin: 0; }
+
+/* plano de cenas */
+.plano-grade { display: grid; grid-template-columns: 1.25fr .75fr; gap: 24px; align-items: start; }
+.codigo { background: #0a0b10; border: 1px solid var(--line); border-radius: 14px; padding: 18px; font: 14px/1.7 ui-monospace, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.codigo .c1 { color: #6b6e80; }
+.codigo .id { color: var(--cta); font-weight: 700; }
+.codigo .gat { background: rgba(86,101,240,.25); color: #dfe3ff; border-radius: 4px; padding: 0 3px; }
+.codigo .desc { color: #9fd7ff; }
+.legenda-plano { display: grid; gap: 10px; margin-top: 14px; }
+.legenda-plano div { display: grid; grid-template-columns: 26px 1fr; gap: 10px; font-size: 15px; }
+.legenda-plano .m { font: 700 12px "Inter", sans-serif; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--text); margin-top: 2px; }
+.resultado figure { margin: 0; }
+.resultado img { width: 100%; border-radius: 14px; border: 1px solid var(--line); display: block; }
+.resultado figcaption { font-size: 13.5px; color: var(--text-dim); margin-top: 8px; }
+.encaixe { margin-top: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+.encaixe-fluxo { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 12px; align-items: center; margin-top: 14px; }
+.encaixe-fluxo > div { background: var(--surface-2); border-radius: 12px; padding: 12px 14px; font-size: 14px; min-height: 92px; }
+.encaixe-fluxo .seta { color: var(--text-dim); font-size: 20px; background: none; min-height: 0; padding: 0; }
+.encaixe-fluxo mark { background: rgba(86,101,240,.3); color: #fff; border-radius: 4px; padding: 0 3px; }
+.tl { position: relative; height: 46px; margin-top: 8px; }
+.tl .v { position: absolute; left: 0; right: 0; height: 18px; border-radius: 4px; background: #262838; font-size: 10px; color: var(--text-dim); padding-left: 4px; line-height: 18px; }
+.tl .v2 { top: 0; } .tl .v1 { top: 24px; }
+.tl .clip { position: absolute; top: 0; left: 46%; width: 30%; height: 18px; border-radius: 4px; background: var(--accent); font: 600 10px/18px "Inter", sans-serif; color: #fff; padding-left: 5px; }
+.tl .cab { position: absolute; top: -4px; bottom: 0; left: 46%; width: 2px; background: var(--cta); }
+
+/* pasta */
+.pasta { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 8px 0; }
+.pasta-linha { display: grid; grid-template-columns: minmax(170px, 230px) 120px 1fr; gap: 12px; padding: 12px 22px; border-top: 1px solid var(--line); align-items: baseline; font-size: 15px; }
+.pasta-linha:first-child { border-top: 0; }
+.pasta-linha .nome { font: 14px ui-monospace, Consolas, monospace; }
+.pasta-linha .nome::before { content: "📁 "; }
+.pasta-linha .nome.arq::before { content: "📄 "; }
+.tag { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 99px; justify-self: start; }
+.tag.voce { background: rgba(184,242,60,.14); color: var(--cta); }
+.tag.kit { background: var(--surface-2); color: var(--text-dim); }
+.tag.juntos { background: rgba(245,185,66,.14); color: var(--aviso); }
+
+/* glossário e dúvidas */
+.glossario { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 10px; }
+.termo { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+.termo b { display: block; margin-bottom: 2px; }
+.termo span { color: var(--text-dim); font-size: 14.5px; }
+.duvidas details { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0 18px; margin-bottom: 8px; }
+.duvidas summary { cursor: pointer; padding: 15px 0; font-weight: 600; }
+.duvidas details p { color: #c9cbd6; }
+
+/* VSLs */
+.vsl { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px; margin-top: 14px; }
+.vsl-topo { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.vsl-topo h3 { font-size: 20px; }
+.vsl-topo a { color: var(--text-dim); font-size: 13px; }
+.barra { height: 6px; background: var(--surface-2); border-radius: 99px; margin: 14px 0 18px; overflow: hidden; }
+.barra i { display: block; height: 100%; background: var(--grad); border-radius: 99px; }
+.proximo { background: var(--surface-2); border-left: 3px solid var(--cta); border-radius: 10px; padding: 14px 16px; margin-bottom: 18px; }
+.proximo .rotulo { color: var(--cta); }
+.itens { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr)); gap: 2px 24px; }
+.item { display: flex; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); }
+.item b { font-weight: 600; font-size: 15px; }
+.item small { display: block; color: var(--text-dim); font-size: 13px; overflow-wrap: anywhere; }
+.item a { font-size: 12.5px; color: var(--text-dim); }
+.legenda-estados { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--text-dim); margin-top: 10px; }
+.legenda-estados span { display: inline-flex; gap: 6px; align-items: center; }
+.legenda-estados .dot { margin: 0; }
+.alerta { margin-top: 14px; background: rgba(255,92,92,.08); border: 1px solid rgba(255,92,92,.3); border-radius: var(--radius); padding: 14px 16px; }
+
+footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--text-dim); font-size: 13.5px; }
+
+@media (max-width: 860px) {
+  .promessas, .comecar, .conversa-grade, .plano-grade, .passo .colunas { grid-template-columns: 1fr; }
+  .trilha { grid-template-columns: repeat(4, 1fr); }
+  .encaixe-fluxo { grid-template-columns: 1fr; }
+  .encaixe-fluxo .seta { transform: rotate(90deg); justify-self: center; }
+  .resultado { max-width: 360px; }
+}
+@media (max-width: 560px) {
+  .topo nav { display: none; }
+  .trilha { grid-template-columns: repeat(2, 1fr); }
+  .passo { grid-template-columns: 1fr; }
+  .passo .num { margin-bottom: 6px; }
+  .pasta-linha { grid-template-columns: 1fr; gap: 4px; padding: 12px 16px; }
+}
+</style>
+</head>
+<body>
+<div class="topo"><div class="topo-in">
+  <img src="../2-design-system/STLFLIX/stlflix.svg" alt="STLFLIX"><b>Painel do editor</b>
+  <nav>
+    <a href="#comecar">Começar</a><a href="#conversar">Conversar com o Claude</a><a href="#caminho">Passo a passo</a>
+    <a href="#plano">Plano de cenas</a><a href="#pasta">A pasta</a><a href="#palavras">Palavras</a><a href="#duvidas">Dúvidas</a>
+  </nav>
+</div></div>
+
+<main>
+  <section class="hero" id="comecar">
+    <h1>Edite a VSL. <em>O Claude cuida do repetitivo.</em></h1>
+    <p class="lead">Este kit junta você, o <b>FilmCraft</b> e um assistente, o <b>Claude</b>. Você continua editando como sempre. O Claude escreve tudo o que foi falado no vídeo, cria os letterings animados da STLFLIX (os <b>motions</b>) a partir do que você planejar e coloca cada um no segundo certo da timeline.</p>
+    <div class="promessas">
+      <div class="promessa"><div class="ico">🎬</div><h3>Você edita</h3><p>Decupagem, ritmo e escolha dos takes continuam com você, no FilmCraft.</p></div>
+      <div class="promessa"><div class="ico">⚡</div><h3>O Claude faz o repetitivo</h3><p>Transcrever, desenhar dezenas de motions e encaixar cada um no tempo da fala.</p></div>
+      <div class="promessa"><div class="ico">✋</div><h3>Nada muda sem você aprovar</h3><p>Antes de mexer na timeline, ele mostra o que vai fazer e espera o seu “pode”.</p></div>
+    </div>
+
+    <div class="comecar">
+      <div class="cartao" id="cartao-pc"></div>
+      <div class="cartao destaque" id="cartao-proximo"></div>
+    </div>
+  </section>
+
+  <section class="bloco" id="suas-vsls" hidden>
+    <h2>Suas VSLs</h2>
+    <p class="intro">O que já está pronto em cada VSL e o que fazer agora. Para atualizar esta página, peça ao Claude: “Abre o painel”.</p>
+    <div id="projetos"></div>
+    <div class="legenda-estados">
+      <span><i class="dot" style="background:var(--ok)"></i>pronto</span>
+      <span><i class="dot" style="background:var(--aviso)"></i>conferir</span>
+      <span><i class="dot" style="background:var(--falta)"></i>falta</span>
+      <span><i class="dot"></i>ainda não é a hora</span>
+    </div>
+  </section>
+
+  <section class="bloco" id="conversar">
+    <h2>Como conversar com o Claude</h2>
+    <p class="intro">O <b>Claude Code</b> é uma janela de conversa, como um chat. Você escreve o que precisa em português, do seu jeito, e ele faz no seu computador: abre o FilmCraft, lê as pastas, coloca os motions. Não precisa saber programar nem decorar comandos.</p>
+    <div class="conversa-grade">
+      <div class="chat">
+        <div class="cab">Exemplo de conversa</div>
+        <div class="msg voce"><span class="quem">Você</span>Coloca os motions no corpo</div>
+        <div class="msg claude"><span class="quem">Claude</span>Achei o lugar de 43 dos 45 motions. Dois ficaram de fora: o <b>B12C</b>, porque a frase não aparece no vídeo, e o <b>B20A</b>, que ainda não foi renderizado. O primeiro entra em 00:12. Posso colocar?</div>
+        <div class="msg voce"><span class="quem">Você</span>Pode colocar</div>
+        <div class="msg claude"><span class="quem">Claude</span>Pronto: 43 motions na trilha V2. Dá uma olhada na timeline e salve com <b>Ctrl+S</b>.</div>
+      </div>
+      <div class="dicas">
+        <div class="dica"><div class="ico">📂</div><div><b>Abra sempre na pasta do kit</b><span>Ao abrir o Claude Code, escolha a pasta <code>C:\STLFLIX_EDITOR</code>. É ali que ele encontra as instruções e as suas VSLs.</span></div></div>
+        <div class="dica"><div class="ico">💬</div><div><b>Fale normal</b><span>“Transcreve o lead B”, “o motion do bloco 5 entrou atrasado”, “o áudio está estranho”. Se ele não entender, ele pergunta.</span></div></div>
+        <div class="dica"><div class="ico">✅</div><div><b>Ele pede antes de mexer</b><span>Para mudar a timeline, ele mostra o plano e espera você responder “pode colocar”. Se não gostar, diga o que mudar.</span></div></div>
+        <div class="dica"><div class="ico">🔐</div><div><b>Pedidos de permissão</b><span>O Claude Code pergunta antes de usar o computador (abrir programa, rodar ferramenta). Na dúvida, pergunte a ele o que aquilo faz antes de permitir.</span></div></div>
+        <div class="dica"><div class="ico">🛑</div><div><b>Para parar</b><span>Aperte <b>Esc</b> ou escreva “para”. Se estiver mexendo em outro projeto no FilmCraft, avise: “calma, estou em outro projeto”.</span></div></div>
+        <div class="dica"><div class="ico">💾</div><div><b>Salvar é com você</b><span>Ele não salva o projeto do FilmCraft. Depois de revisar, aperte <b>Ctrl+S</b>.</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloco" id="caminho">
+    <h2>Do roteiro à entrega, passo a passo</h2>
+    <p class="intro">Uma VSL passa por 7 etapas. Em cada uma, veja quem faz, o que acontece e o que pedir ao Claude.</p>
+    <div class="trilha">
+      <a href="#p1"><span class="n">1</span>Criar a VSL<small>juntos</small></a>
+      <a href="#p2"><span class="n">2</span>Decupar<small>você</small></a>
+      <a href="#p3"><span class="n">3</span>Transcrever<small>Claude</small></a>
+      <a href="#p4"><span class="n">4</span>Plano de cenas<small>você</small></a>
+      <a href="#p5"><span class="n">5</span>Criar os motions<small>Claude</small></a>
+      <a href="#p6"><span class="n">6</span>Pôr na timeline<small>Claude + você revisa</small></a>
+      <a href="#p7"><span class="n">7</span>Conferir e entregar<small>juntos</small></a>
+    </div>
+    <div class="passos">
+      <div class="passo" id="p1"><div class="num">1</div><div>
+        <h3>Criar a VSL <span class="quem-faz juntos">juntos</span></h3>
+        <p>Cada VSL ganha uma pasta própria, onde ficam o roteiro, o plano e tudo o que for gerado. O Claude cria a pasta e pergunta o que precisa: onde está o projeto do FilmCraft e como se chamam as sequências (por exemplo, “Corpo decupado” e “Lead A”).</p>
+        <div class="colunas">
+          <div><div class="rotulo">Você precisa ter</div><p>O roteiro do teleprompter em .txt e o projeto já salvo no FilmCraft.</p></div>
+          <div><div class="rotulo">Peça</div><div class="pedido"><span>Cria uma VSL nova chamada VSL-Nome</span><button>copiar</button></div></div>
+        </div>
+      </div></div>
+      <div class="passo" id="p2"><div class="num">2</div><div>
+        <h3>Decupar <span class="quem-faz voce">você</span></h3>
+        <p>A edição da fala é sua, no FilmCraft, como você já faz: escolher os takes, tirar pausas e tropeços, ajustar os cortes. O guia de estilo do time está em <code>5-guias/estilo-de-edicao.md</code>.</p>
+        <div class="colunas">
+          <div><div class="rotulo">Resultado</div><p>As sequências decupadas (corpo e leads), salvas no projeto.</p></div>
+          <div><div class="rotulo">Dica</div><p>Se o Claude for ajudar depois, mantenha os nomes das sequências iguais aos que você passou no passo 1.</p></div>
+        </div>
+      </div></div>
+      <div class="passo" id="p3"><div class="num">3</div><div>
+        <h3>Transcrever <span class="quem-faz claude">Claude</span></h3>
+        <p>O Claude “ouve” a sequência e escreve tudo o que foi falado, com o minuto e o segundo de cada frase, separado pelos blocos do roteiro. Com placa NVIDIA, leva cerca de 1 minuto para cada 10 minutos de vídeo; sem ela, bem mais. Ele também avisa se encontrar trecho sem áudio ou palavra repetida que escapou na decupagem.</p>
+        <div class="colunas">
+          <div><div class="rotulo">Resultado</div><p>Um documento com a fala dividida por blocos, para você ler e escrever o plano de cenas.</p></div>
+          <div><div class="rotulo">Peça</div><div class="pedido"><span>Abre o FilmCraft e transcreve o corpo</span><button>copiar</button></div></div>
+        </div>
+      </div></div>
+      <div class="passo" id="p4"><div class="num">4</div><div>
+        <h3>Escrever o plano de cenas <span class="quem-faz voce">você</span></h3>
+        <p>Aqui entra o olhar de editor: com a transcrição e a copy na mão, você decide onde cada motion aparece e o que ele mostra. É um arquivo de texto simples, explicado logo abaixo, em <a href="#plano">O plano de cenas</a>. O Claude pode sugerir ideias e conferir se está tudo no formato certo, mas quem decide é você.</p>
+        <div class="colunas">
+          <div><div class="rotulo">Resultado</div><p>O <code>plano-de-cenas.md</code> da VSL, com todos os motions.</p></div>
+          <div><div class="rotulo">Peça</div><div class="pedido"><span>Confere meu plano de cenas</span><button>copiar</button></div></div>
+        </div>
+      </div></div>
+      <div class="passo" id="p5"><div class="num">5</div><div>
+        <h3>Criar os motions <span class="quem-faz claude">Claude</span></h3>
+        <p>O Claude transforma cada cena do plano num vídeo com fundo transparente, já no visual da STLFLIX e na posição certa do quadro (acima da cabeça do apresentador). Primeiro ele faz 2 ou 3 para você ver como ficou; só depois faz todos. Cada motion leva uns 30 segundos.</p>
+        <div class="colunas">
+          <div><div class="rotulo">Resultado</div><p>Um arquivo .mov por cena (B05A, B05B…) e um vídeo de prévia com os motions sobre o apresentador.</p></div>
+          <div><div class="rotulo">Peça</div><div class="pedido"><span>Cria os motions B05A e B05B para eu ver</span><button>copiar</button></div></div>
+        </div>
+      </div></div>
+      <div class="passo" id="p6"><div class="num">6</div><div>
+        <h3>Pôr na timeline <span class="quem-faz claude">Claude + você revisa</span></h3>
+        <p>O Claude procura na transcrição o momento em que cada frase-gatilho é falada e coloca o motion ali, na trilha V2. Antes, ele mostra a lista com o tempo de cada um e o que ficou de fora. Ele também pode acertar o enquadramento dos takes da câmera (escala e posição) de uma vez.</p>
+        <div class="colunas">
+          <div><div class="rotulo">Você faz</div><p>Aprova, assiste na timeline, ajusta o que quiser e salva com <b>Ctrl+S</b>.</p></div>
+          <div><div class="rotulo">Peça</div><div class="pedido"><span>Coloca os motions no corpo</span><button>copiar</button></div></div>
+        </div>
+      </div></div>
+      <div class="passo" id="p7"><div class="num">7</div><div>
+        <h3>Conferir e entregar <span class="quem-faz juntos">juntos</span></h3>
+        <p>Antes de exportar, o Claude confere o que já deu problema em outras VSLs: vídeo do Drive que sai preto, trilha desligada, áudio só de um lado ou faltando. Depois que você exporta, ele manda os arquivos XML das sequências para a pasta do Drive.</p>
+        <div class="colunas">
+          <div><div class="rotulo">Você faz</div><p>Exporta o vídeo no FilmCraft, depois que a conferência não achar nenhum erro.</p></div>
+          <div><div class="rotulo">Peça</div><div class="pedido"><span>Confere tudo antes de exportar</span><button>copiar</button></div></div>
+        </div>
+      </div></div>
+    </div>
+  </section>
+
+  <section class="bloco" id="plano">
+    <h2>O plano de cenas, explicado</h2>
+    <p class="intro">É a parte mais importante do seu trabalho no kit. Para cada motion, você escreve três coisas: um código, a frase em que ele deve aparecer e o que aparece na tela. O Claude faz o resto.</p>
+    <div class="plano-grade">
+      <div>
+        <div class="codigo"><span class="c1">## Bloco 05 · Luan</span>
+
+- **<span class="id">B05H</span>** · Quase R$ 5 mil — "<span class="gat">Luan achou um produto com potencial de</span>"
+  <span class="desc">duração: 7</span>
+  <span class="desc">&gt; 0.3 | kicker: O PRODUTO QUE O LUAN ACHOU | número: R$ 5 mil [verde, conta] | legenda: quase isso de lucro, com 1 impressora</span></div>
+        <div class="legenda-plano">
+          <div><span class="m">1</span><span><b>O código</b> (<code>B05H</code>): bloco 5, cena H. Vira o nome do arquivo do motion. Cada cena tem um código diferente.</span></div>
+          <div><span class="m">2</span><span><b>A frase-gatilho</b>, entre aspas: 4 a 8 palavras que o apresentador fala no momento em que o motion deve aparecer. <b>Copie da transcrição</b>, do jeito que foi dito.</span></div>
+          <div><span class="m">3</span><span><b>O que aparece</b>: quanto tempo fica na tela (<code>duração: 7</code> segundos) e, na linha que começa com <code>&gt;</code>, as peças separadas por <code>|</code>, de cima para baixo. Aqui: uma linha pequena em cima (kicker), um número grande verde que conta até R$ 5 mil, e uma legenda. O <code>0.3</code> quer dizer que tudo isso entra 0,3 s depois do início.</span></div>
+          <div><span class="m">+</span><span>Quer que a tela mude no meio da cena? Escreva outra linha com <code>&gt;</code> (por exemplo <code>&gt; 3.5 | frase: …</code>): cada linha substitui a anterior naquele segundo.</span></div>
+        </div>
+      </div>
+      <div class="resultado">
+        <figure>
+          <img src="img/exemplo-motion.jpg" alt="Motion B05H sobre o apresentador: O PRODUTO QUE O LUAN ACHOU, R$ 5 mil, quase isso de lucro, com 1 impressora">
+          <figcaption>O resultado: o motion B05H na VSL do Shark, acima da cabeça do apresentador.</figcaption>
+        </figure>
+      </div>
+    </div>
+    <div class="encaixe">
+      <h3>Como o Claude sabe onde colocar cada motion?</h3>
+      <p class="dim" style="margin-top:6px">Pela frase-gatilho. É por isso que ela precisa vir da transcrição, e não do roteiro: o que vale é o que o apresentador realmente falou.</p>
+      <div class="encaixe-fluxo">
+        <div><div class="rotulo">Seu plano</div><b>B05H</b> — “Luan achou um produto com potencial de”</div>
+        <div class="seta">→</div>
+        <div><div class="rotulo">Transcrição</div>02:14 — o <mark>Luan achou um produto com potencial de</mark> vender muito…</div>
+        <div class="seta">→</div>
+        <div><div class="rotulo">Timeline</div>O motion entra em 02:14, na trilha V2
+          <div class="tl"><div class="v v2">V2</div><div class="v v1">V1</div><div class="clip">B05H</div><div class="cab"></div></div>
+        </div>
+      </div>
+    </div>
+    <p class="dim" style="margin-top:18px">Todos os tipos de peça (título, número, ícones, logo, botão de CTA…) e as boas práticas estão em <code>5-guias/plano-de-cenas.md</code>. Cada VSL nova já vem com um plano de exemplo completo na pasta <code>04-plano-de-cenas</code>.</p>
+  </section>
+
+  <section class="bloco" id="pasta">
+    <h2>A pasta da VSL</h2>
+    <p class="intro">Cada VSL tem uma pasta dentro de <code>C:\STLFLIX_EDITOR\projetos\</code>. Algumas partes você preenche; outras o kit cria sozinho.</p>
+    <div class="pasta">
+      <div class="pasta-linha"><span class="nome">01-roteiro</span><span class="tag voce">você coloca</span><span>O roteiro do teleprompter (<code>teleprompter.txt</code>), com os blocos marcados assim: <code>--- BLOCO 5 · Título ---</code></span></div>
+      <div class="pasta-linha"><span class="nome">02-brutos</span><span class="tag voce">você coloca</span><span>Os vídeos da câmera. Se já estão no Drive, não precisa copiar: um atalho basta.</span></div>
+      <div class="pasta-linha"><span class="nome">03-b-rolls</span><span class="tag voce">você coloca</span><span>Os B-rolls, ou um atalho para a pasta deles no Drive.</span></div>
+      <div class="pasta-linha"><span class="nome">04-plano-de-cenas</span><span class="tag voce">você escreve</span><span>O seu plano de cenas (já vem um exemplo) e um print do apresentador (<code>referencia.png</code>), usado na prévia dos motions.</span></div>
+      <div class="pasta-linha"><span class="nome">05-motions</span><span class="tag kit">o kit cria</span><span>Os motions prontos, um arquivo .mov por cena.</span></div>
+      <div class="pasta-linha"><span class="nome">06-transcricoes</span><span class="tag kit">o kit cria</span><span>As transcrições de cada sequência.</span></div>
+      <div class="pasta-linha"><span class="nome">07-exports</span><span class="tag kit">o kit cria</span><span>Vídeos e XMLs exportados. As versões antigas vão para uma subpasta: nada é apagado.</span></div>
+      <div class="pasta-linha"><span class="nome arq">config.json</span><span class="tag juntos">com o Claude</span><span>As configurações da VSL: projeto do FilmCraft, nomes das sequências, enquadramento dos takes, pasta de entrega no Drive.</span></div>
+    </div>
+  </section>
+
+  <section class="bloco" id="palavras">
+    <h2>Palavras que você vai ver</h2>
+    <p class="intro">O kit usa alguns termos que talvez sejam novos.</p>
+    <div class="glossario">
+      <div class="termo"><b>Claude Code</b><span>O programa onde você conversa com o Claude. Ele consegue usar o seu computador para fazer as tarefas.</span></div>
+      <div class="termo"><b>Kit</b><span>Esta pasta, <code>C:\STLFLIX_EDITOR</code>: instruções, ferramentas e o visual da STLFLIX que o Claude usa.</span></div>
+      <div class="termo"><b>Sequência</b><span>Uma timeline dentro do projeto do FilmCraft, como “Corpo decupado” ou “Lead A”.</span></div>
+      <div class="termo"><b>Transcrição</b><span>O texto de tudo o que foi falado na sequência, com o tempo de cada frase.</span></div>
+      <div class="termo"><b>Motion</b><span>Lettering animado com o visual da STLFLIX (títulos, números, ícones) que aparece sobre o apresentador.</span></div>
+      <div class="termo"><b>Plano de cenas</b><span>O arquivo onde você lista os motions: em que frase entram e o que mostram.</span></div>
+      <div class="termo"><b>Frase-gatilho</b><span>As palavras faladas no momento em que o motion deve aparecer. É como o Claude acha o lugar dele.</span></div>
+      <div class="termo"><b>Renderizar</b><span>Transformar a descrição de um motion em vídeo de verdade (.mov com fundo transparente).</span></div>
+      <div class="termo"><b>Trilha V2</b><span>A segunda trilha de vídeo da timeline, acima dos takes. É onde os motions entram.</span></div>
+      <div class="termo"><b>XML</b><span>Um arquivo que guarda a montagem de uma sequência, para abrir em outro computador ou programa.</span></div>
+      <div class="termo"><b>Drive (G:)</b><span>O Google Drive compartilhado da empresa, onde ficam os brutos e as entregas.</span></div>
+      <div class="termo"><b>ArtCraft Launcher</b><span>O programa que instala e atualiza o FilmCraft.</span></div>
+    </div>
+  </section>
+
+  <section class="bloco duvidas" id="duvidas">
+    <h2>Dúvidas comuns</h2>
+    <p class="intro"></p>
+    <details><summary>Preciso saber programar?</summary><p>Não. Você conversa em português. Os comandos que aparecem no kit são para o Claude; você não precisa decorar nenhum.</p></details>
+    <details><summary>O Claude pode estragar o meu projeto?</summary><p>Ele sempre mostra o que vai mudar e espera você aprovar. Antes de apagar ou refazer algo, ele duplica a sequência como backup. E nada fica gravado no arquivo do projeto até você salvar com Ctrl+S. Se não gostar do resultado, diga o que está errado e peça para ele voltar como estava.</p></details>
+    <details><summary>Posso editar enquanto o Claude trabalha?</summary><p>Na timeline que ele está mexendo, não: espere ele terminar. Se precisar trabalhar em outro projeto, avise (“calma, estou em outro projeto”) e ele para.</p></details>
+    <details><summary>O motion entrou no lugar errado. E agora?</summary><p>Quase sempre é porque a frase-gatilho aparece duas vezes no vídeo, ou foi copiada do roteiro em vez da transcrição. Ajuste a frase no plano e peça para colocar de novo. Você também pode só arrastar o motion na timeline.</p></details>
+    <details><summary>Quero mudar o texto de um motion.</summary><p>Mude no plano de cenas e peça: “refaz o motion B05H”. Ele cria só aquele de novo.</p></details>
+    <details><summary>Algo deu errado e não sei o que é.</summary><p>Conte ao Claude o que você viu, do seu jeito: “a exportação saiu preta”, “o áudio está só de um lado”, “os motions não aparecem”. Os problemas que já aconteceram no time estão documentados no kit, e ele sabe resolver.</p></details>
+    <details><summary>Onde ficam os meus arquivos?</summary><p>Cada VSL fica em <code>C:\STLFLIX_EDITOR\projetos\</code>. Os vídeos pesados (brutos e B-rolls) podem continuar no Drive. Atualizar o kit (“atualiza o kit”) não mexe nas suas VSLs.</p></details>
+  </section>
+
+  <footer>Painel gerado em <span id="gerado"></span>. Para atualizar, peça ao Claude: “Abre o painel”.</footer>
+</main>
+
+<script id="dados" type="application/json">__DADOS__</script>
+<script>
+(function () {
+  var D = JSON.parse(document.getElementById("dados").textContent);
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var pedido = function (t) { return t ? '<div class="pedido"><span>' + esc(t) + '</span><button>copiar</button></div>' : ""; };
+
+  document.getElementById("gerado").textContent = D.gerado;
+
+  // computador pronto?
+  var LINK = { "FilmCraft": "https://getartcraft.com" };
+  var faltam = D.ferramentas.filter(function (f) { return !f.ok && f.essencial; });
+  var grade = '<div class="ferramentas">' + D.ferramentas.map(function (f) {
+    var estado = f.ok ? "ok" : (f.essencial ? "falta" : "aviso");
+    var det = esc(f.detalhe) + (!f.ok && LINK[f.item] ? ' · <a href="' + LINK[f.item] + '">baixar o ArtCraft Launcher</a>' : "");
+    return '<div class="ferr ' + estado + '"><span class="dot"></span><div><b>' + esc(f.item) + "</b><small>" + det + "</small></div></div>";
+  }).join("") + "</div>";
+  var pc = document.getElementById("cartao-pc");
+  if (!faltam.length) {
+    pc.innerHTML = '<div class="rotulo">Seu computador</div><div class="estado-pc"><span class="grande">✅</span><div><h3>Está tudo instalado</h3>' +
+      '<p class="dim" style="margin:0">FilmCraft, ferramentas de vídeo e o que o Claude precisa para trabalhar.</p></div></div>' +
+      '<details class="ferr-det"><summary>ver detalhes</summary>' + grade + "</details>";
+  } else {
+    pc.style.borderColor = "rgba(255,92,92,.4)";
+    var temFC = faltam.some(function (f) { return f.item === "FilmCraft"; });
+    pc.innerHTML = '<div class="rotulo" style="color:var(--falta)">Seu computador</div><h3>Falta instalar: ' + esc(faltam.map(function (f) { return f.item; }).join(", ")) + "</h3>" +
+      (temFC ? '<p class="dim">O FilmCraft você instala pelo <a href="https://getartcraft.com">ArtCraft Launcher</a>. </p>' : "") +
+      '<p class="dim">O resto o Claude instala. Peça:</p>' + pedido("Instala o kit") + grade;
+  }
+
+  // próximo passo
+  var prox = document.getElementById("cartao-proximo");
+  if (!D.projetos.length) {
+    prox.innerHTML = '<div class="rotulo">Seu primeiro passo</div><h3>Criar a sua primeira VSL</h3>' +
+      "<p>Tenha em mãos:</p><ul><li>o roteiro do teleprompter (.txt)</li><li>o projeto da VSL salvo no FilmCraft</li></ul>" +
+      "<p>Abra o Claude Code na pasta <code>C:\\STLFLIX_EDITOR</code> e escreva:</p>" + pedido("Cria uma VSL nova chamada VSL-Nome") +
+      '<p class="dim" style="margin:12px 0 0;font-size:14px">Troque “VSL-Nome” pelo nome da sua VSL, por exemplo VSL-Shark. Ele vai te fazer algumas perguntas.</p>';
+  } else {
+    var p0 = D.projetos[0];
+    prox.innerHTML = '<div class="rotulo">Próximo passo · ' + esc(p0.nome) + "</div><h3>" + esc(p0.proximo.titulo) + "</h3><p>" + esc(p0.proximo.detalhe) + "</p>" +
+      (p0.proximo.pedido ? "<p>Peça ao Claude:</p>" + pedido(p0.proximo.pedido) : '<p class="dim">Essa parte é com você.</p>') +
+      (D.projetos.length > 1 ? '<p class="dim" style="margin:12px 0 0;font-size:14px">Veja as outras VSLs em <a href="#suas-vsls">Suas VSLs</a>.</p>' : "");
+  }
+
+  // suas VSLs
+  if (D.projetos.length) {
+    document.getElementById("suas-vsls").hidden = false;
+    document.getElementById("projetos").innerHTML = D.projetos.map(function (p) {
+      var conta = p.itens.filter(function (i) { return i.estado !== "info"; });
+      var feitos = conta.filter(function (i) { return i.estado === "ok"; }).length;
+      var px = p.proximo;
+      return '<div class="vsl"><div class="vsl-topo"><h3>' + esc(p.nome) + "</h3>" +
+        (p.uri ? '<a href="' + esc(p.uri) + '">abrir a pasta</a>' : "") +
+        '<span class="dim" style="font-size:14px">' + feitos + " de " + conta.length + " prontos</span></div>" +
+        '<div class="barra"><i style="width:' + Math.round(100 * feitos / Math.max(conta.length, 1)) + '%"></i></div>' +
+        '<div class="proximo"><div class="rotulo">Agora</div><p><b>' + esc(px.titulo) + "</b>: " + esc(px.detalhe) + "</p>" + pedido(px.pedido) + "</div>" +
+        '<div class="itens">' + p.itens.map(function (i) {
+          return '<div class="item ' + esc(i.estado) + '"><span class="dot"></span><div><b>' + esc(i.titulo) + "</b><small>" + esc(i.detalhe) + "</small>" +
+            (i.pasta ? '<a href="' + esc(i.pasta) + '">abrir pasta</a>' : "") + "</div></div>";
+        }).join("") + "</div></div>";
+    }).join("") + (D.erros && D.erros.length ? '<div class="alerta">Não consegui ler: ' + esc(D.erros.join(" · ")) + "</div>" : "");
+  }
+
+  // copiar pedidos
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest(".pedido button");
+    if (!b) return;
+    var texto = b.previousElementSibling.textContent;
+    var feito = function () { b.textContent = "copiado"; b.classList.add("copiado"); setTimeout(function () { b.textContent = "copiar"; b.classList.remove("copiado"); }, 1500); };
+    var antigo = function () {
+      var a = document.createElement("textarea"); a.value = texto; document.body.appendChild(a); a.select();
+      try { document.execCommand("copy"); } catch (err) {}
+      a.remove(); feito();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texto).then(feito, antigo);
+    else antigo();
+  });
+})();
+</script>
+</body>
+</html>

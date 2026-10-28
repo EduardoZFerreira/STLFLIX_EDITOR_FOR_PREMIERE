@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <link rel="stylesheet" href="assets/tokens.css" />
+      <style>
+        /* Lettering: sem scrim. Ele mostra a impressora nesta parte
+           (plano-de-cenas.md § Pistas do bruto) — nada cobre o quadro. */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: var(--font-body);
+        }
+        #sy-panel {
+          max-width: 1180px;
+        }
+        .sy-row {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          font-size: 42px;
+          font-weight: 600;
+          color: var(--text);
+          padding: 9px 0;
+        }
+        .sy-x {
+          flex: 0 0 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: var(--no);
+          color: #0d0e14;
+          font-family: var(--font-title);
+          font-size: 24px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        #sy-verdict {
+          margin-top: 22px;
+          padding-top: 24px;
+          border-top: 2px solid rgba(246, 250, 254, 0.14);
+          font-family: var(--font-title);
+          font-size: 52px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          color: var(--no);
+        }
+      </style>
+
+      <div id="root" data-composition-id="symptoms" data-width="1920" data-height="1080">
+        <div class="hf-anchor" id="sy-anchor">
+          <div class="hf-bar" id="sy-bar"></div>
+          <div class="hf-panel" id="sy-panel">
+            <div class="sy-row" id="sy-row-1">
+              <div class="sy-x">✕</div>
+              <div>Filamento soltou da mesa</div>
+            </div>
+            <div class="sy-row" id="sy-row-2">
+              <div class="sy-x">✕</div>
+              <div>Camada descolou no meio</div>
+            </div>
+            <div id="sy-verdict">"Essa impressora é uma porcaria"</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+
+          tl.fromTo("#sy-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 0);
+          tl.fromTo("#sy-panel", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.08);
+          tl.fromTo("#sy-row-1", { opacity: 0, x: -22 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 0.3);
+          tl.fromTo("#sy-row-2", { opacity: 0, x: -22 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 0.95);
+
+          // O instinto imediato, com um leve solavanco
+          tl.fromTo("#sy-verdict", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.45, ease: "back.out(1.8)" }, 1.8);
+
+          window.__timelines["symptoms"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>
