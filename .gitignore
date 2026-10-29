@@ -28,3 +28,6 @@ painel/index.html
 control_token
 .env
 !projetos/_MODELO-VSL/*/.gitkeep
+
+# amostra renderizada de cada campanha (stlflix: motions.mjs amostra)
+2-design-system/campanhas/*/_amostra/

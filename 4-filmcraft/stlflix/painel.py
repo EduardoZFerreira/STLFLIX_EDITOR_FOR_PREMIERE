@@ -11,6 +11,7 @@ import pathlib
 import subprocess
 import tempfile
 
+from . import campanha as campanhas
 from . import plano, vsls
 from .blocos import ler_roteiro
 from .motions import arquivos_motion
@@ -197,6 +198,15 @@ def projeto(pasta):
                            _item("Quadro de referência", "aviso", "sem quadro do apresentador: a prévia dos motions sai em fundo cinza",
                                  "claude", f"Exporta um quadro do apresentador para a referência da {vid}"))
 
+    cid = proj["motions"]["campanha"]
+    ccfg = campanhas.ler(cid)
+    camp = dict(id=cid, nome=ccfg.get("nome") or cid, existe=os.path.isdir(campanhas.pasta(cid)),
+                cores=(ccfg.get("cores") or {}).get("degrade") or [], logo=_uri(os.path.join(campanhas.pasta(cid), "logo-kv.png")),
+                icones=[dict(nome=n, uri=_uri(os.path.join(campanhas.pasta(cid), n + ".png"))) for n in campanhas.icones(cid)])
+    itens["campanha"] = (_item("Campanha dos motions", "ok", f"{camp['nome']} · {len(camp['icones'])} ícones") if camp["existe"] else
+                         _item("Campanha dos motions", "falta", f"a campanha '{cid}' não existe neste kit (atualize o kit ou escolha outra)",
+                               "claude", f"Troca a campanha da {vid}"))
+
     pasta_mov = proj.caminho(proj["pastas"]["motions"])
     movs = arquivos_motion(pasta_mov) if os.path.isdir(pasta_mov) else {}
     sem = [i for i in ids if i not in movs]
@@ -232,7 +242,7 @@ def projeto(pasta):
         proximo = _item("Encaixar e entregar", "info", "motions prontos: coloque na timeline, revise e cheque antes de exportar",
                         "claude", f"Coloca os motions no {next(iter(seqs))} da {vid} e checa antes de exportar" if seqs else None)
     return dict(id=vid, nome=nome, pasta=proj.pasta, uri=_uri(proj.pasta), itens=list(itens.values()), proximo=proximo,
-                galeria=galeria(proj, est) if est else None)
+                galeria=galeria(proj, est) if est else None, campanha=camp)
 
 
 def gerar(abrir=True):

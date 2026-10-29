@@ -51,6 +51,35 @@ def cmd_nova(a):
         print(f"  ⚠ a pasta está no Google Drive ({drive}): os renders dos motions ficam lentos e podem falhar. Prefira um disco do computador.")
 
 
+def cmd_campanha(a):
+    from . import campanha
+    if a.acao == "listar":
+        for c in campanha.listar():
+            print(f"  {c['id']:10s} {c['nome']:28s} {len(c['icones'])} ícones{'' if c['logo'] else ' · SEM LOGO'}: {', '.join(c['icones'])}")
+        return
+    if not a.id:
+        print("✗ informe o código da campanha, ex.: campanha conferir bf26", file=sys.stderr)
+        sys.exit(2)
+    if a.acao in ("nova", "importar"):
+        if a.acao == "nova":
+            cores = [c.strip() for c in a.cores.split(",")] if a.cores else None
+            feitos = campanha.nova(a.id, a.nome or a.id, a.de, cores, a.barra, a.brilho)
+            print(f"✓ campanha criada: {campanha.pasta(a.id)} (cores em campanha.json)")
+        else:
+            if not a.de:
+                print("✗ informe --de <pasta com os arquivos do design>", file=sys.stderr)
+                sys.exit(2)
+            feitos = campanha.importar(a.id, a.de)
+        for origem, nome, aviso in feitos:
+            print(f"  {'✓' if nome else '✗'} {origem}" + (f" → {nome}.png" if nome else "") + (f"  ⚠ {aviso}" if aviso else ""))
+    erros = campanha.conferir(a.id)
+    for e in erros:
+        print(f"  ✗ {e}")
+    print(f"✓ campanha {a.id} pronta para usar" if not erros else f"{len(erros)} problema(s) na campanha {a.id}")
+    if erros:
+        sys.exit(1)
+
+
 def cmd_vsls(a):
     if a.anotar:
         print(f"✓ anotada: {vsls.anotar(a.anotar)}")
@@ -262,6 +291,14 @@ def main(argv=None):
     p = sub.add_parser("vsls", help="lista as VSLs deste computador (não precisa de --projeto)")
     p.add_argument("--anotar", metavar="PASTA", help="põe na lista uma pasta de VSL que já existe (copiada de outro editor, por exemplo)")
     p.add_argument("--tirar", metavar="VSL", help="tira da lista (não apaga a pasta)")
+    p = sub.add_parser("campanha", help="campanhas visuais dos motions: listar, nova, importar, conferir (não precisa de --projeto)")
+    p.add_argument("acao", choices=["listar", "nova", "importar", "conferir"])
+    p.add_argument("id", nargs="?", help="código da campanha, ex.: natal26 (pasta em 2-design-system/campanhas)")
+    p.add_argument("--nome", help="nome legível, ex.: \"Natal 2026\"")
+    p.add_argument("--de", help="pasta com os PNGs do design (ícones e logo)")
+    p.add_argument("--cores", help="degradê dos títulos, da palavra-chave e do botão: \"#RRGGBB,#RRGGBB,...\" (padrão: o da BF26)")
+    p.add_argument("--barra", help="cor da barrinha (padrão: a última do degradê)")
+    p.add_argument("--brilho", help="cor do brilho embaixo dos ícones (padrão: a primeira do degradê)")
     sub.add_parser("escolher-pasta", help="abre a janela do Windows para o editor escolher uma pasta e mostra o caminho")
     p = sub.add_parser("nova", help="cria a pasta da VSL (no caminho de --projeto) a partir de projetos/_MODELO-VSL")
     p.add_argument("--nome", help="nome da VSL (padrão: o nome da pasta)")
@@ -311,13 +348,15 @@ def main(argv=None):
     try:
         if a.cmd == "vsls":
             return cmd_vsls(a)
+        if a.cmd == "campanha":
+            return cmd_campanha(a)
         if not a.projeto:
             ap.error("informe --projeto <VSL> (o nome ou a pasta)")
         if a.cmd == "nova":
             return cmd_nova(a)
         proj = Projeto(vsls.resolver(a.projeto))
         globals()["cmd_" + a.cmd.replace("-", "_")](proj, a)
-    except (FileNotFoundError, KeyError, ValueError, FilmCraftError) as e:
+    except (FileNotFoundError, FileExistsError, KeyError, ValueError, FilmCraftError) as e:
         print(f"✗ {e}", file=sys.stderr)
         sys.exit(2)
 

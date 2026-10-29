@@ -243,6 +243,20 @@ details.ferr-det summary { cursor: pointer; color: var(--accent-text); font-size
 .motion .desc { font: 12px/1.5 ui-monospace, Consolas, monospace; color: #9fd7ff; background: #0a0b10; border-radius: 8px; padding: 8px 10px;
   white-space: pre-wrap; overflow-wrap: anywhere; max-height: 10.5em; overflow: auto; }
 
+/* campanha da VSL */
+.camp-topo { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+.camp-topo h3 { font-size: 19px; }
+.camp-degrade { width: 180px; height: 14px; border-radius: 99px; border: 1px solid var(--line); }
+.icones { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr)); gap: 10px; }
+.icone { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 10px 10px; display: grid; justify-items: center;
+  gap: 10px; cursor: pointer; color: var(--text); font: 13px ui-monospace, Consolas, monospace; }
+.icone:hover { border-color: var(--accent); }
+.icone img { height: 76px; width: auto; max-width: 100%; object-fit: contain; }
+.icone small { color: var(--text-dim); font: 600 11.5px "Inter", sans-serif; }
+.icone.copiado { border-color: var(--ok); }
+.icone.copiado small { color: var(--ok); }
+.camp-logo { max-width: min(420px, 100%); height: auto; display: block; margin-top: 14px; }
+
 footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--text-dim); font-size: 13.5px; }
 
 @media (max-width: 1400px) {
@@ -314,6 +328,12 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
     <h2>Motions da VSL</h2>
     <p class="intro">Cada cena do plano de cenas, com o motion ao lado. Clique na imagem para abrir o vídeo. “Mudou” quer dizer que a descrição da cena foi alterada no plano depois que o motion foi criado: ele precisa ser refeito.</p>
     <div id="galeria"></div>
+  </section>
+
+  <section class="bloco" id="campanha" hidden>
+    <h2>Ícones da campanha</h2>
+    <p class="intro">Os ícones que você pode usar no plano de cenas desta VSL. Clique em um para copiar a peça pronta e colar no plano. A campanha muda as cores dos títulos e do botão; o verde de resultado é da marca e não muda.</p>
+    <div id="campanha-conteudo"></div>
   </section>
 
   <section class="bloco" id="conversar">
@@ -618,6 +638,7 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
     var sec = document.getElementById("suas-vsls");
     sec.hidden = modo !== "vsl";
     desenharGaleria();
+    desenharCampanha();
     if (sec.hidden) return;
     var p = atual, c = contagem(p), px = p.proximo;
     document.getElementById("projetos").innerHTML = '<div class="vsl"><div class="vsl-topo"><h3>' + esc(p.nome) + "</h3>" +
@@ -679,6 +700,32 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
     desenharGaleria();
   });
 
+  // campanha da VSL: cores e ícones; clicar num ícone copia "ícone: nome" para o plano de cenas
+  function desenharCampanha() {
+    var sec = document.getElementById("campanha");
+    var c = modo === "vsl" ? atual.campanha : null;
+    sec.hidden = !c;
+    if (!c) return;
+    var degrade = c.cores.length > 1 ? "linear-gradient(90deg, " + c.cores.map(esc).join(", ") + ")" : (c.cores[0] || "transparent");
+    document.getElementById("campanha-conteudo").innerHTML = !c.existe
+      ? '<div class="alerta">A campanha <code>' + esc(c.id) + "</code> do config desta VSL não existe neste kit. Peça: " + pedido("Troca a campanha da " + atual.id) + "</div>"
+      : '<div class="camp-topo"><h3>' + esc(c.nome) + '</h3><code>' + esc(c.id) + '</code><span class="camp-degrade" style="background:' + degrade +
+        '"></span><span class="dim" style="font-size:14px">' + c.icones.length + " ícones</span></div>" +
+        '<div class="icones">' + c.icones.map(function (i) {
+          return '<button class="icone" data-icone="' + esc(i.nome) + '"><img loading="lazy" src="' + esc(i.uri) + '" alt="">' + esc(i.nome) + "<small>copiar</small></button>";
+        }).join("") + "</div>" +
+        (c.logo ? '<p class="dim" style="margin:18px 0 0;font-size:14px">Logo (peça <code>logo</code> no plano):</p><img class="camp-logo" loading="lazy" src="' + esc(c.logo) + '" alt="Logo da campanha">' : "");
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-icone]");
+    if (!b) return;
+    copiarTexto("ícone: " + b.dataset.icone, function () {
+      var s = b.querySelector("small");
+      b.classList.add("copiado"); s.textContent = "copiado";
+      setTimeout(function () { b.classList.remove("copiado"); s.textContent = "copiar"; }, 1500);
+    });
+  });
+
   menu.addEventListener("change", function () {
     if (menu.value === "__nova") { modo = "nova"; desenhar(); }
     else escolher(menu.value);
@@ -693,11 +740,7 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
   desenhar();
 
   // copiar pedidos
-  document.addEventListener("click", function (e) {
-    var b = e.target.closest(".pedido button");
-    if (!b) return;
-    var texto = b.previousElementSibling.textContent;
-    var feito = function () { b.textContent = "copiado"; b.classList.add("copiado"); setTimeout(function () { b.textContent = "copiar"; b.classList.remove("copiado"); }, 1500); };
+  function copiarTexto(texto, feito) {
     var antigo = function () {
       var a = document.createElement("textarea"); a.value = texto; document.body.appendChild(a); a.select();
       try { document.execCommand("copy"); } catch (err) {}
@@ -705,6 +748,14 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
     };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texto).then(feito, antigo);
     else antigo();
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest(".pedido button");
+    if (!b) return;
+    copiarTexto(b.previousElementSibling.textContent, function () {
+      b.textContent = "copiado"; b.classList.add("copiado");
+      setTimeout(function () { b.textContent = "copiar"; b.classList.remove("copiado"); }, 1500);
+    });
   });
 })();
 </script>

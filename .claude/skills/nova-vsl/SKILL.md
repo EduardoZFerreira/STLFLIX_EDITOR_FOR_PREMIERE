@@ -10,7 +10,7 @@ description: Cria e configura a pasta de uma VSL nova onde o editor quiser no co
    - junto do projeto do FilmCraft (a pasta onde está o `.fcproj`), se ele já existe;
    - num disco do computador, **não no Google Drive**: os renders dos motions ficam lentos e a pasta de trabalho usa atalhos que o Drive não aceita.
    Se ele não souber o caminho, rode `./stlflix.cmd escolher-pasta`: abre a janela do Windows e devolve o caminho escolhido. A VSL vai numa subpasta com o nome dela dentro do que ele escolher.
-3. **Campanha**: liste as pastas de `2-design-system/campanhas/` e pergunte qual é a da VSL (cores e elementos da campanha nos motions). Se só existir uma, confirme com ele.
+3. **Campanha**: `./stlflix.cmd campanha listar` mostra as campanhas do kit (nome e ícones). Pergunte qual é a da VSL (cores, ícones e logo dos motions). Se a campanha dela ainda não existe, ofereça criar (skill `campanha`) ou começar com outra e trocar depois.
 4. Crie: `./stlflix.cmd --projeto "<pasta escolhida>/<VSL>" nova --nome "<nome legível>" --campanha <campanha>`. O comando já anota a VSL na lista deste computador; dali em diante use só `--projeto <VSL>`.
 5. Preencha o `config.json` da VSL junto com o editor:
    - `filmcraft.projeto`: caminho do `.fcproj` (peça para ele salvar o projeto antes, se ainda não existe).

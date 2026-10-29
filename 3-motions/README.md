@@ -9,6 +9,7 @@ node 3-motions/motions.mjs previa  --projeto <VSL> [--plano corpo]     abre o St
 node 3-motions/motions.mjs render  --projeto <VSL> [--plano corpo] [--so B05H,B05I] [--por-parte 30]
 node 3-motions/motions.mjs render  --projeto <VSL> [--plano corpo] --pendentes        só as que faltam ou mudaram no plano
 node 3-motions/motions.mjs estado  --projeto <VSL>                                   JSON com a situação de cada cena (usado pelo painel)
+node 3-motions/motions.mjs amostra --campanha <código>                              3 cenas de teste com as cores, ícones e logo da campanha
 node 3-motions/motions.mjs migrar  --build <build.mjs antigo> --gatilhos <plano com frases> --saida <plano.md>
 ```
 
@@ -36,7 +37,7 @@ plano-de-cenas.md ──dsl.mjs──▶ cenas ──modelos/<modelo>/motor.mjs�
 ```json
 "motions": {
   "modelo": "shark-vsl",                                modelo visual (pasta em 3-motions/modelos/)
-  "campanha": "bf26",                                   pasta em 2-design-system/campanhas/ (ícones e logo)
+  "campanha": "bf26",                                   pasta em 2-design-system/campanhas/ (cores no campanha.json, ícones e logo)
   "faixa": { "top": 130, "height": 430 },               onde os motions ficam no quadro (acima da cabeça)
   "referencia": "04-plano-de-cenas/referencia.png",     quadro do apresentador, só para a prévia
   "hyperframes": "0.8.176"                              versão fixa do HyperFrames

@@ -44,7 +44,7 @@ Uma cena **só com a frase-gatilho**, sem descrição, também vale: o motion po
 | `frase: Texto **chave**` | Frase-tese com peso variável (a letra "engorda") | `px=110` |
 | `número: R$ 5 mil` | Número grande | `verde` (resultado), `negativo`, `gradiente`, `tamanho=…`, `conta` (anima a contagem de 0 até o valor) |
 | `legenda: texto` | Linha de apoio embaixo do título ou do número | `atraso=…` |
-| `ícone: nome` | Ícone do kit da campanha (`2-design-system/campanhas/<campanha>/`) | `altura=150` |
+| `ícone: nome` | Ícone do kit da campanha (`2-design-system/campanhas/<campanha>/`). O painel mostra os ícones da campanha da VSL com o nome de cada um (clique para copiar) | `altura=150` |
 | `ícones: nome, nome, nome` | Fileira de ícones | `altura=120`, `passo=0.25` |
 | `logo` | Logo do key visual da campanha | `largura=940` |
 | `cta: QUERO O VITALÍCIO` | Botão de chamada com seta | |

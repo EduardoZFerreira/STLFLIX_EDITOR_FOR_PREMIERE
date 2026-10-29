@@ -42,6 +42,7 @@ powershell -ExecutionPolicy Bypass -File 1-instalacao/instalar.ps1 [-Verificar]
 | `painel` (sem `--projeto`) | Gera e abre `painel/index.html`: menu para escolher ou criar a VSL, ferramentas instaladas (com o botão do ArtCraft), o que falta na VSL escolhida, o próximo passo e a galeria dos motions (miniaturas em `05-motions/_miniaturas`) | não |
 | `vsls [--anotar PASTA] [--tirar VSL]` (sem `--projeto`) | Lista as VSLs deste computador e onde estão; anota uma pasta que já existe ou tira da lista (sem apagar) | não |
 | `escolher-pasta` | Abre a janela "Escolher pasta" do Windows e mostra o caminho escolhido | não |
+| `campanha listar\|nova\|importar\|conferir [código]` (sem `--projeto`) | Campanhas visuais dos motions em `2-design-system/campanhas`: cria a partir dos PNGs do design (recorta, padroniza 520 px, corrige nomes), confere cores, logo e ícones | não (muda o kit) |
 | `nova [--nome X] [--campanha bf26]` | Cria a pasta `--projeto` (caminho completo, onde o editor quiser) a partir de `projetos/_MODELO-VSL` e anota a VSL | não |
 | `abrir` | Abre o FilmCraft com o controle ligado e o `.fcproj` do config | não |
 | `status` | O que já está preenchido e gerado | não |
@@ -64,6 +65,7 @@ powershell -ExecutionPolicy Bypass -File 1-instalacao/instalar.ps1 [-Verificar]
 | `previa` | Abre o Studio do HyperFrames |
 | `render [--so B05H,B05I] [--por-parte 30]` | .mov por cena em `05-motions` + prévia sobre o quadro de referência; a versão anterior vai para `_motions anteriores (data)` |
 | `render --pendentes` | Só as cenas sem .mov ou que mudaram no plano depois do render |
+| `amostra --campanha <código>` | 3 cenas de teste com as cores, ícones e logo da campanha → `campanhas/<código>/_amostra` |
 | `estado` | Situação de cada cena (pronto, falta, mudou, só encaixe), em JSON; o painel usa para a galeria |
 
 Qualquer comando do `motions.mjs` aceita `--arquivo <plano.md>` no lugar do plano do config (ex.: o rascunho).
@@ -76,7 +78,7 @@ Quando o editor pedir "abre o painel" (ou quiser saber o que falta), rode `./stl
 
 ## Fluxo de uma VSL
 
-Cada etapa tem uma skill em `.claude/skills/`: `instalar-kit`, `nova-vsl`, `decupar`, `transcrever`, `plano-de-cenas`, `gerar-motions`, `encaixar-motions`, `finalizar`, `problemas`.
+Cada etapa tem uma skill em `.claude/skills/`: `instalar-kit`, `nova-vsl`, `campanha`, `decupar`, `transcrever`, `plano-de-cenas`, `gerar-motions`, `encaixar-motions`, `finalizar`, `problemas`.
 
 1. `nova` → editor preenche `config.json`, `01-roteiro/teleprompter.txt` e as pastas de assets; importa os brutos no projeto do FilmCraft.
 2. `abrir` → `transcrever-brutos`.
@@ -108,7 +110,7 @@ Quando o editor pedir para atualizar: confira que `git status` não tem mudança
 
 - `projetos/_MODELO-VSL/`: modelo de projeto (config comentado no `4-filmcraft/README.md` e `3-motions/README.md`).
 - `3-motions/modelos/shark-vsl/`: o único modelo visual por enquanto (faixa de lettering acima da cabeça). Mudanças no motor valem para todo o time: só com pedido explícito e teste com `render --so`.
-- `2-design-system/`: assets da marca e das campanhas (`campanhas/bf26`).
+- `2-design-system/`: assets da marca e das campanhas. Cada campanha (`campanhas/<código>/`) tem `campanha.json` (cores e texto do logo), os ícones e o `logo-kv.png`; guia em `campanhas/README.md`, skill `campanha`. Campanha nova muda o kit: suba para o GitHub para o time receber.
 - `5-guias/`: aprendizados do FilmCraft, estilo de edição, linguagem do plano de cenas.
 - `PLANO.md`: fases e decisões do kit.
 - Projetos de VSL, brutos, renders e `.venv` **não vão para o git** (ver `.gitignore`).

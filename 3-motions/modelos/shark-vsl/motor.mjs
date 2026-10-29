@@ -5,10 +5,34 @@
 import fs from "node:fs";
 import path from "node:path";
 
+// Cores e textos da campanha: 2-design-system/campanhas/<campanha>/campanha.json (ligada na pasta de trabalho).
+// Sem o arquivo, valem os da BF26, e o resultado é idêntico ao motor original. A marca STLFLIX (fontes, branco,
+// verde-limão de resultado e CTA) não muda com a campanha.
+const CAMPANHA_PADRAO = {
+  nome: "Black November 2026",
+  logo: { arquivo: "logo-kv.png", texto: "Black November · Infinitas possibilidades para viver de impressão 3D" },
+  cores: { degrade: ["#8DFB5E", "#2EE6A6", "#22C7F0", "#2F7BFF"], barra: "#2F7BFF", brilho: "#07EF2D" },
+};
+export function lerCampanha(pasta, campanha) {
+  let c = {};
+  try { c = JSON.parse(fs.readFileSync(path.join(pasta, campanha, "campanha.json"), "utf8")); } catch {}
+  return { ...CAMPANHA_PADRAO, ...c, logo: { ...CAMPANHA_PADRAO.logo, ...(c.logo || {}) }, cores: { ...CAMPANHA_PADRAO.cores, ...(c.cores || {}) } };
+}
+const rgb = (hex) => { const h = hex.replace("#", ""); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)).join(","); };
+const degrade = (cores) => {                           // 4 cores: 0/32/64/100% como na BF26; outras quantidades, por igual
+  const pos = cores.length === 4 ? [0, 32, 64, 100] : cores.map((_, i) => Math.round((100 * i) / Math.max(1, cores.length - 1)));
+  return `linear-gradient(90deg, ${cores.map((c, i) => `${c} ${pos[i]}%`).join(", ")})`;
+};
+
 export function construir(cenas, { pasta, faixa = {}, campanha = "bf26", so = null } = {}) {
 cenas = JSON.parse(JSON.stringify(cenas));            // o pós-processamento marca as peças: não mexe no original
 const W = 1080, H = 1920;
 const BAND = { top: 130, height: 430, side: 64, ...faixa };   // faixa acima da cabeça do apresentador
+const CAMP = lerCampanha(pasta, campanha), DG = CAMP.cores.degrade;
+const COR2 = DG[1] || DG[0], COR3 = DG[2] || DG[DG.length - 1];   // brilhos dos efeitos (fx): 2ª e 3ª cor do degradê
+// número de resultado ([verde] no plano): o verde → azul da marca em qualquer campanha, salvo "resultado" no campanha.json
+const RES = CAMP.cores.resultado || CAMPANHA_PADRAO.cores.degrade;
+const NUM_BG = degrade(RES) === degrade(DG) ? "var(--grad-title)" : degrade(RES);
 const GAP = 0.6;                                       // intervalo entre cenas no reel (facilita o corte)
 for (const s of cenas) if (s.topo) s.fases.forEach((ph, pi) => { for (const e of ph.els) if (e.k === "title") e.imp = { label: ph.els.some((x) => x.k === "label"), icone: ph.els.some((x) => x.k === "ico"), caneta: true }; });   // caneta em todas as batidas (o usuário preferiu assim)
 
@@ -113,7 +137,7 @@ function elHTML(e, at) {
     case "cta": return `<div class="el cta" ${a(at)}><span class="btn">${esc(e.text)}<i class="shine"></i></span><span class="down">↓</span><i class="tri"></i></div>`;
     case "ico": return `<div class="el ico" data-noanim="1" ${a(at)} style="height:${e.h || 170}px"><img src="${campanha}/${e.nome}.png" alt=""></div>`;
     case "icos": return `<div class="el icos" data-noanim="1" ${a(at)}>${e.nomes.map((nm, i) => `<div class="ico" ${a(at + i * (e.step ?? 0.25))} style="height:${e.h || 120}px"><img src="${campanha}/${nm}.png" alt=""></div>`).join("")}</div>`;
-    case "logo": return `<div class="el logo" data-noanim="1" ${a(at)}><img src="${campanha}/logo-kv.png" alt="Black November · Infinitas possibilidades para viver de impressão 3D" style="width:${e.w || 940}px"></div>`;
+    case "logo": return `<div class="el logo" data-noanim="1" ${a(at)}><img src="${campanha}/${CAMP.logo.arquivo}" alt="${esc(CAMP.logo.texto)}" style="width:${e.w || 940}px"></div>`;
     case "x3d": return `<div class="el x3d" ${a(at)} data-noanim="1">${e.linhas.map(([t, cor, px], i) => `<div class="xl xl-${cor} it" data-t="${esc(t)}" style="font-size:${px}px" ${a(at + i * 0.35)}><span class="xf">${esc(t)}</span></div>`).join("")}</div>`;
   }
   throw new Error("peça desconhecida: " + e.k);
@@ -121,8 +145,8 @@ function elHTML(e, at) {
 
 const CSS = `
 __ROOT__ { position: absolute; inset: 0; overflow: hidden; font-family: var(--font-title);
-  --grad-title: linear-gradient(90deg, #8DFB5E 0%, #2EE6A6 32%, #22C7F0 64%, #2F7BFF 100%);
-  --accent: #2F7BFF; }   /* Black: só verde → azul (sem violeta/rosa); barrinha no azul da campanha */
+  --grad-title: ${degrade(DG)};
+  --accent: ${CAMP.cores.barra}; }   /* Black: só verde → azul (sem violeta/rosa); barrinha no azul da campanha */
 .band { position: absolute; left: ${BAND.side}px; right: ${BAND.side}px; top: ${BAND.top}px; height: ${BAND.height}px; }
 .phase { font-family: var(--font-title); position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center;
   text-shadow: 0 2px 18px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.5); }
@@ -158,8 +182,8 @@ __ROOT__ { position: absolute; inset: 0; overflow: hidden; font-family: var(--fo
 .wide { letter-spacing: .08em; }
 .tx { position: relative; display: inline-block; }
 .num { white-space: nowrap; font-weight: 700; color: var(--text); letter-spacing: -.04em; line-height: .95; font-variant-numeric: tabular-nums; }
-.num.lime { background: var(--grad-title); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none;
-  filter: drop-shadow(0 0 18px rgba(46,230,166,.35)) drop-shadow(0 2px 12px rgba(0,0,0,.45)); }
+.num.lime { background: ${NUM_BG}; -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none;
+  filter: drop-shadow(0 0 18px rgba(${rgb(RES[1] || RES[0])},.35)) drop-shadow(0 2px 12px rgba(0,0,0,.45)); }
 .num.lime .cnt { background: inherit; -webkit-background-clip: text; background-clip: text; }
 .n-lg { font-size: 160px; } .n-md { font-size: 116px; }
 .neg { color: var(--no); }
@@ -203,9 +227,9 @@ __ROOT__ { position: absolute; inset: 0; overflow: hidden; font-family: var(--fo
 .shine, .tri { display: none; }
 .fx .num.lime { position: relative; }
 .fx .down { display: none; }
-.fx .tri { display: block; width: 0; height: 0; border-left: 44px solid transparent; border-right: 44px solid transparent; border-top: 56px solid #2EE6A6;
-  filter: drop-shadow(0 0 16px rgba(46,230,166,.7)) drop-shadow(0 3px 8px rgba(0,0,0,.5)); }
-.fx .btn { position: relative; overflow: hidden; box-shadow: 0 0 36px rgba(46,230,166,.5), 0 0 90px rgba(34,199,240,.25), 0 6px 18px rgba(0,0,0,.4); }
+.fx .tri { display: block; width: 0; height: 0; border-left: 44px solid transparent; border-right: 44px solid transparent; border-top: 56px solid ${COR2};
+  filter: drop-shadow(0 0 16px rgba(${rgb(COR2)},.7)) drop-shadow(0 3px 8px rgba(0,0,0,.5)); }
+.fx .btn { position: relative; overflow: hidden; box-shadow: 0 0 36px rgba(${rgb(COR2)},.5), 0 0 90px rgba(${rgb(COR3)},.25), 0 6px 18px rgba(0,0,0,.4); }
 .fx .shine { display: block; position: absolute; top: -40%; bottom: -40%; left: -40%; width: 30%; transform: skewX(-22deg);
   background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.85), rgba(255,255,255,0)); }
 .dust { position: absolute; left: -${BAND.side}px; top: -110px; width: ${W}px; height: 600px; pointer-events: none; }
@@ -214,7 +238,7 @@ __ROOT__ { position: absolute; inset: 0; overflow: hidden; font-family: var(--fo
 .ico { position: relative; display: flex; justify-content: center; align-items: flex-end; flex: 0 0 auto; }
 .ico img { height: 100%; width: auto; display: block; position: relative; z-index: 1; filter: drop-shadow(0 10px 14px rgba(0,0,0,.45)); }
 .ico::after { content: ""; position: absolute; left: 50%; bottom: -4%; width: 72%; height: 16%; transform: translateX(-50%); z-index: 0;
-  background: radial-gradient(ellipse at center, rgba(7,239,45,.5), rgba(7,239,45,0) 70%); filter: blur(6px); }
+  background: radial-gradient(ellipse at center, rgba(${rgb(CAMP.cores.brilho)},.5), rgba(${rgb(CAMP.cores.brilho)},0) 70%); filter: blur(6px); }
 .icos { display: flex; justify-content: center; align-items: flex-end; gap: 28px; margin-top: 10px; }
 .logo img { display: block; height: auto; filter: drop-shadow(0 16px 26px rgba(0,0,0,.5)); }
 .x3d { display: flex; flex-direction: column; align-items: center; gap: 0; }

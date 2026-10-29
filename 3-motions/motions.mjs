@@ -269,9 +269,56 @@ function migrar(o) {
   });
 }
 
+// Amostra de uma campanha: 3 cenas de teste (degradê, barra, número, ícones, logo, CTA) renderizadas num projeto
+// temporário; a prévia e um quadro de cada cena ficam em 2-design-system/campanhas/<campanha>/_amostra (fora do git).
+async function amostra(o) {
+  const id = o.campanha;
+  if (!id || id === true) throw new Error("use --campanha <pasta em 2-design-system/campanhas>");
+  const pasta = path.join(DS, "campanhas", id);
+  if (!fs.existsSync(pasta)) throw new Error(`a campanha "${id}" não existe em 2-design-system/campanhas`);
+  const icones = fs.readdirSync(pasta).filter((n) => n.endsWith(".png") && !n.startsWith("logo")).map((n) => n.slice(0, -4)).slice(0, 3);
+  const temLogo = fs.existsSync(path.join(pasta, "logo-kv.png"));
+  const tmp = path.join(os.tmpdir(), "stlflix-amostra", id);
+  fs.rmSync(tmp, { recursive: true, force: true });
+  fs.mkdirSync(path.join(tmp, "04-plano-de-cenas"), { recursive: true });
+  const ref = o.referencia && o.referencia !== true ? path.resolve(o.referencia) : "";
+  fs.writeFileSync(path.join(tmp, "config.json"), JSON.stringify({ nome: `Amostra ${id}`, motions: { campanha: id, referencia: ref } }));
+  fs.writeFileSync(path.join(tmp, "04-plano-de-cenas", "plano-de-cenas.md"), [
+    "## Bloco 01 · Amostra da campanha", "",
+    '- **A01A** · Título e palavra-chave — "amostra da campanha cena um"',
+    "  duração: 6",
+    "  > 0.3 | kicker: AMOSTRA DA CAMPANHA | título: Viver de **impressão 3D** | legenda: o degradê da campanha na palavra-chave",
+    "  > 3.2 | frase: Uma ideia por **batida**", "",
+    '- **A01B** · Número e ícones — "amostra da campanha cena dois"',
+    "  duração: 6",
+    "  topo: A BARRA E O TÍTULO DO TOPO",
+    "  > 0.3 | número: R$ 5 mil [verde, conta] | legenda: verde só para resultado",
+    ...(icones.length ? [`  > 3.2 | ícones: ${icones.join(", ")} [altura=120] | legenda: ícones da campanha`] : []), "",
+    '- **A01C** · Logo e CTA — "amostra da campanha cena três"',
+    "  duração: 6 · poeira: 0-6",
+    ...(temLogo ? ["  > 0.3 | logo"] : ["  > 0.3 | título: (campanha sem logo-kv.png)"]),
+    "  > 3.0 | cta: QUERO AGORA", "",
+  ].join("\n"));
+  const proj = projeto(tmp);
+  const { todas, geraveis, erros } = cenasDoPlano(path.join(tmp, "04-plano-de-cenas", "plano-de-cenas.md"));
+  erros.push(...iconesQueFaltam(proj, todas));
+  if (erros.length) throw new Error(erros.join("; "));
+  const r = render(await carregarModelo(proj.mv.modelo), proj, "amostra", geraveis, {});
+  const saida = path.join(pasta, "_amostra");
+  fs.rmSync(saida, { recursive: true, force: true });
+  fs.mkdirSync(saida, { recursive: true });
+  fs.copyFileSync(r.previa, path.join(saida, "previa.mp4"));
+  for (const f of r.feitos) {              // um quadro de cada batida de cada cena (as batidas começam em 0,3 e ~3 s)
+    [2.2, 5.2].forEach((t, k) => sh("ffmpeg", ["-v", "error", "-y", "-ss", String(f.inicio + Math.min(t, f.dur - 0.3)), "-i", r.previa,
+      "-frames:v", "1", "-q:v", "3", path.join(saida, `${f.id}-${k + 1}.jpg`)]));
+  }
+  console.log(`✓ amostra da campanha ${id}: ${path.join(saida, "previa.mp4")} (+ ${r.feitos.length * 2} quadros em ${saida})`);
+}
+
 async function main() {
   const o = args();
   if (o.cmd === "migrar") return migrar(o);
+  if (o.cmd === "amostra") return amostra(o);
   if (!o.projeto) throw new Error("use --projeto <VSL> (o nome ou a pasta)");
   const proj = projeto(resolverVsl(o.projeto));
   if (o.cmd === "estado") return estado(proj);
