@@ -110,6 +110,44 @@ def cmd_transcrever(proj, a):
     _blocos(proj, a.sequencia, tr, mapa)
 
 
+def cmd_transcrever_brutos(proj, a):
+    from . import decupagem
+    prefixo = proj["takes"]["prefixo"]
+    if a.pasta:
+        takes, onde = decupagem.takes_da_pasta(a.pasta, prefixo), a.pasta
+    elif porta_aberta():
+        takes, onde = decupagem.takes_do_projeto(FC(), prefixo), "projeto do FilmCraft"
+    else:
+        onde = os.path.join(proj.pasta, "02-brutos")
+        takes = decupagem.takes_da_pasta(onde, prefixo)
+    if not takes:
+        print(f"✗ nenhum vídeo começando com '{prefixo}' em {onde}: confira takes.prefixo no config, abra o FilmCraft "
+              "com os brutos importados, ou use --pasta", file=sys.stderr)
+        sys.exit(2)
+    so = a.so.split(",") if a.so else None
+    print(f"{len(takes)} takes ({onde}): {', '.join(sorted(takes))}")
+    for take, r in decupagem.transcrever_brutos(proj, takes, so, a.refazer):
+        print(f"  {take}: " + ("já transcrito" if r is None else f"{r['palavras']} palavras em {r['segundos']}s ({r['device']})"))
+    caminho, feitos = decupagem.escrever_brutos_md(proj)
+    print(f"documento: {caminho} ({len(feitos)} takes)")
+
+
+def cmd_decupar(proj, a):
+    from . import decupagem
+    arquivo = _plano_pedido(proj, a)
+    if not a.aplicar:
+        clipes, trechos, erros = decupagem.planejar(proj, a.sequencia, arquivo)
+        print(decupagem.tabela(clipes, trechos))
+        for e in erros:
+            print(f"  ✗ {e}")
+        print("(nada foi alterado; rode de novo com --aplicar para montar a sequência)")
+        sys.exit(1 if erros else 0)
+    r = decupagem.aplicar(FC(), proj, a.sequencia, arquivo)
+    print(f"✓ '{proj.sequencia(a.sequencia)}' montada: {r['clipes']} clipes de {mmss(r['inicio'])} a {mmss(r['fim'])}, "
+          f"{r['crossfades']} crossfades, {r['marcadores']} marcadores. A sequência foi duplicada antes (backup) "
+          f"e {r['tirados']} clipes dos brutos saíram dela. Revise e salve com Ctrl+S.")
+
+
 def _blocos(proj, chave, tr, mapa):
     achados, faltando, falas = blocos.gerar(proj, chave, tr, mapa)
     if len(achados) <= 1:                          # lead ou trecho avulso: não é o corpo dividido em blocos
@@ -146,8 +184,25 @@ def cmd_plano(proj, a):
             print("  ✓ formato ok")
 
 
+def _plano_pedido(proj, a):
+    """--plano aceita um caminho a partir da raiz do kit ou da pasta da VSL (ex.: 04-plano-de-cenas/rascunho-corpo.md)."""
+    if not a.plano:
+        return None
+    return a.plano if os.path.exists(a.plano) else proj.caminho(a.plano)
+
+
+def cmd_gatilhos(proj, a):
+    P, fora = motions.planejar(proj, a.sequencia, _plano_pedido(proj, a), exigir_mov=False)
+    for p in P:
+        print(f"  ✓ {p['id']:6s} {mmss(p['inicio'])}  nota {p['nota']:.2f}  | ouvido: {p['ouvido'][:60]}")
+    for c, motivo in fora:
+        print(f"  ✗ {c['id']:6s} \"{c['gatilho']}\" | {motivo}")
+    print(f"{len(P)} frases encontradas na transcrição · {len(fora)} com problema"
+          + (": copie a frase de novo da transcrição, do jeito que foi dita" if fora else ""))
+
+
 def cmd_motions(proj, a):
-    P, fora = motions.planejar(proj, a.sequencia, a.plano)
+    P, fora = motions.planejar(proj, a.sequencia, _plano_pedido(proj, a))
     print(motions.tabela(P, fora))
     if a.aplicar:
         n = motions.aplicar(FC(), proj, a.sequencia, P)
@@ -213,11 +268,22 @@ def main(argv=None):
     p.add_argument("--campanha", help="pasta em 2-design-system/campanhas (padrão: a do modelo)")
     sub.add_parser("abrir", help="abre o FilmCraft com o controle ligado e o projeto do config")
     sub.add_parser("status", help="o que já está preenchido / gerado no projeto")
+    p = sub.add_parser("transcrever-brutos", help="transcreve cada take da câmera (para a decupagem) e escreve 06-transcricoes/brutos.md")
+    p.add_argument("--pasta", help="pasta com os brutos (padrão: os importados no FilmCraft aberto, ou 02-brutos)")
+    p.add_argument("--so", help="só estes takes, ex.: C2347,C2348")
+    p.add_argument("--refazer", action="store_true", help="transcreve de novo os que já foram transcritos")
+    p = sub.add_parser("decupar", help="mostra os cortes da decupagem aprovada (decupagem-<seq>.md); --aplicar monta a sequência")
+    p.add_argument("sequencia")
+    p.add_argument("--plano", help="outro arquivo de decupagem (padrão: 06-transcricoes/decupagem-<seq>.md)")
+    p.add_argument("--aplicar", action="store_true")
     p = sub.add_parser("transcrever", help="exporta o áudio da sequência, transcreve com Whisper e divide por blocos")
     p.add_argument("sequencia")
     p = sub.add_parser("blocos", help="refaz só o documento por blocos a partir da transcrição existente")
     p.add_argument("sequencia")
     sub.add_parser("plano", help="valida o plano-de-cenas.md e mostra quais motions faltam renderizar")
+    p = sub.add_parser("gatilhos", help="confere se cada frase-gatilho do plano (ou de um rascunho) aparece na transcrição; não precisa do FilmCraft nem dos .mov")
+    p.add_argument("sequencia")
+    p.add_argument("--plano", help="outro arquivo de plano, ex.: 04-plano-de-cenas/rascunho-corpo.md")
     p = sub.add_parser("motions", help="encaixa os motions nas frases-gatilho (mostra o plano; --aplicar coloca)")
     p.add_argument("sequencia")
     p.add_argument("--plano", help="outro plano de cenas (padrão: o do config)")
@@ -251,7 +317,7 @@ def main(argv=None):
             return cmd_nova(a)
         proj = Projeto(vsls.resolver(a.projeto))
         globals()["cmd_" + a.cmd.replace("-", "_")](proj, a)
-    except (FileNotFoundError, KeyError, FilmCraftError) as e:
+    except (FileNotFoundError, KeyError, ValueError, FilmCraftError) as e:
         print(f"✗ {e}", file=sys.stderr)
         sys.exit(2)
 

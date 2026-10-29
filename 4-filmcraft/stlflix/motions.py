@@ -25,16 +25,19 @@ def duracao(arquivo):
 
 
 def arquivos_motion(pasta):
-    """{código: caminho} dos .mov da pasta (e subpastas): B05A-nome.mov → B05A."""
+    """{código: caminho} dos .mov da pasta (e subpastas): B05A-nome.mov → B05A.
+    Pastas que começam com "_" são backup ("_motions anteriores …") e ficam de fora."""
     out = {}
-    for raiz, _, nomes in os.walk(pasta):
+    for raiz, pastas, nomes in os.walk(pasta):
+        pastas[:] = [p for p in pastas if not p.startswith("_")]
         for n in nomes:
             if n.lower().endswith(".mov"):
                 out.setdefault(n.split("-")[0].split(".")[0], os.path.join(raiz, n))
     return out
 
 
-def planejar(proj, chave, caminho_plano=None):
+def planejar(proj, chave, caminho_plano=None, exigir_mov=True):
+    """Onde cada motion entra. exigir_mov=False só confere as frases-gatilho (serve para rascunho, antes do render)."""
     cfg = proj["motions"]
     tr = json.load(open(proj.arquivo_transcricao(chave), encoding="utf-8"))
     sin = proj["transcricao"].get("sinonimos")
@@ -66,12 +69,12 @@ def planejar(proj, chave, caminho_plano=None):
         if i is None or nota < NOTA_MIN:
             fora.append((c, f"frase não encontrada (melhor {nota:.2f})"))
             continue
-        if c["id"] not in movs:
+        if exigir_mov and c["id"] not in movs:
             fora.append((c, "falta o .mov na pasta de motions"))
             continue
         cursor = i + 1
-        dur = duracao(movs[c["id"]])
-        P.append(dict(id=c["id"], nome=c["nome"], arquivo=movs[c["id"]], dur=dur, nota=round(nota, 2),
+        dur = duracao(movs[c["id"]]) if c["id"] in movs else 0.0
+        P.append(dict(id=c["id"], nome=c["nome"], arquivo=movs.get(c["id"]), dur=dur, nota=round(nota, 2),
                       inicio=max(0.0, tokens[i][1] - cfg["antecedencia_s"]),
                       ouvido=" ".join(t for t, _ in tokens[i:i + 8])))
     P.sort(key=lambda p: p["inicio"])

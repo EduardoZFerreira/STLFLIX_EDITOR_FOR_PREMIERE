@@ -6,7 +6,7 @@ Bem-vindo ao **STLFLIX_EDITOR**, o kit do time de edição para as VSLs verticai
 
 Você continua editando no **FilmCraft**, como sempre. O kit coloca um assistente ao seu lado, o **Claude**, que faz as partes repetitivas:
 
-- **Transcreve** a fala da sequência, com o minuto e o segundo de cada frase.
+- **Transcreve** os brutos da câmera e **monta a decupagem**: cruza a fala com a copy, fica com a melhor versão de cada frase e monta a sequência no FilmCraft, no padrão de cortes do time. Você aprova antes e revisa depois.
 - **Cria os motions**: os letterings animados da STLFLIX (títulos, números, ícones), a partir do que você planejar.
 - **Coloca cada motion** no segundo certo da timeline, na frase em que ele deve aparecer.
 - **Confere** o projeto antes de exportar, procurando problemas que já aconteceram no time (vídeo preto, áudio de um lado só).
@@ -48,6 +48,7 @@ A partir daí, **sempre abra o Claude Code na pasta `C:\STLFLIX_EDITOR`**. É al
 - no topo, o **menu da VSL**: escolha em qual VSL vai trabalhar ou **crie uma nova**. O painel lembra a escolha neste computador;
 - se o computador está pronto, e o botão **⬇ ArtCraft** para baixar o ArtCraft Launcher (que instala e atualiza o FilmCraft);
 - o que já está feito na VSL escolhida e **o próximo passo**, com a frase pronta para copiar e mandar ao Claude;
+- a **galeria dos motions**: uma imagem de cada motion com o texto do plano ao lado, e o que ainda falta criar ou mudou no plano depois de criado;
 - o passo a passo completo, o plano de cenas explicado com exemplo, as palavras novas e as dúvidas comuns.
 
 Se ficar perdido, abra o painel.
@@ -57,16 +58,16 @@ Se ficar perdido, abra o painel.
 | | Etapa | Quem faz | O que pedir ao Claude |
 |---|---|---|---|
 | 1 | **Criar a VSL**: uma pasta para o roteiro, o plano e tudo o que for gerado | juntos | "Cria uma VSL nova chamada VSL-Nome" |
-| 2 | **Decupar** no FilmCraft | você | |
-| 3 | **Transcrever** a sequência | Claude | "Abre o FilmCraft e transcreve o corpo" |
-| 4 | **Escrever o plano de cenas**: onde entra cada motion e o que ele mostra | você | "Confere meu plano de cenas" |
-| 5 | **Criar os motions**: primeiro 2 ou 3 para você ver, depois todos | Claude | "Cria os motions B05A e B05B para eu ver" |
+| 2 | **Transcrever os brutos**: cada take da câmera, com o tempo de cada frase | Claude | "Abre o FilmCraft e transcreve os brutos" |
+| 3 | **Decupar**: ele cruza os brutos com a copy e mostra a decupagem; você aprova, ele monta a sequência e você revisa e salva. Depois ele transcreve a sequência montada | Claude monta, você revisa | "Faz a decupagem do corpo" · "Transcreve o corpo decupado" |
+| 4 | **Escrever o plano de cenas**: onde entra cada motion e o que ele mostra. O Claude pode fazer um rascunho; você aprova o que entra | você | "Faz um rascunho do plano do bloco 5" · "Confere meu plano de cenas" |
+| 5 | **Criar os motions**: primeiro 2 ou 3 para você ver, depois todos. Mudou o plano depois? Ele refaz só o que mudou | Claude | "Cria os motions B05A e B05B para eu ver" · "Refaz os motions que mudaram" |
 | 6 | **Pôr na timeline**: ele mostra a lista, você aprova, revisa e salva (Ctrl+S) | Claude + você | "Coloca os motions no corpo" |
 | 7 | **Conferir e entregar**: você exporta o vídeo, ele manda os XMLs para o Drive | juntos | "Confere tudo antes de exportar" |
 
 Os pedidos são só exemplos: fale do seu jeito.
 
-Para começar a primeira VSL, tenha em mãos o **roteiro do teleprompter** (.txt, com os blocos marcados assim: `--- BLOCO 5 · Título ---`) e o **projeto da VSL já salvo no FilmCraft**.
+Para começar a primeira VSL, tenha em mãos o **roteiro do teleprompter** (.txt, com os blocos marcados assim: `--- BLOCO 5 · Título ---`) e o **projeto da VSL salvo no FilmCraft, com os brutos da câmera importados**.
 
 ## O plano de cenas em um minuto
 

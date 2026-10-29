@@ -8,6 +8,9 @@ import wave
 
 import numpy as np
 
+# o download do modelo avisa (em inglês) que o Windows não deixa criar atalhos no cache: inofensivo, só assusta o editor
+os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
+
 
 def _dlls_cuda():
     # torna as DLLs CUDA instaladas pelo pip (cuBLAS / cuDNN) visíveis no Windows
@@ -16,16 +19,42 @@ def _dlls_cuda():
         os.environ["PATH"] = d + os.pathsep + os.environ["PATH"]
 
 
-def transcrever(wav_16k, saida_json, modelo="large-v3-turbo", idioma="pt", nomes=()):
-    _dlls_cuda()
-    from faster_whisper import WhisperModel
+def modelo_baixado(modelo="large-v3-turbo"):
+    """O modelo do Whisper já está no cache deste computador (~/.cache/huggingface)?"""
+    from faster_whisper.utils import download_model
     try:
-        m = WhisperModel(modelo, device="cuda", compute_type="float16")
-        dev = "cuda"
-    except Exception as e:                      # sem GPU: funciona, só que mais devagar
-        print(f"GPU indisponível ({e}); usando CPU", file=sys.stderr)
-        m = WhisperModel(modelo, device="cpu", compute_type="int8")
-        dev = "cpu"
+        download_model(modelo, local_files_only=True)
+        return True
+    except Exception:                           # noqa: BLE001 — qualquer falha aqui quer dizer "não está"
+        return False
+
+
+def garantir_modelo(modelo="large-v3-turbo"):
+    """Baixa o modelo na primeira vez (o large-v3-turbo tem ~1,6 GB); depois ele fica no cache do computador."""
+    if not modelo_baixado(modelo):
+        print(f"baixando o modelo do Whisper '{modelo}' (só na primeira vez; o large-v3-turbo tem ~1,6 GB)…", file=sys.stderr)
+        from faster_whisper.utils import download_model
+        download_model(modelo)
+
+
+_CARREGADOS = {}                                # modelo já carregado, para transcrever vários brutos sem recarregar
+
+
+def _carregar(modelo):
+    if modelo not in _CARREGADOS:
+        _dlls_cuda()
+        garantir_modelo(modelo)
+        from faster_whisper import WhisperModel
+        try:
+            _CARREGADOS[modelo] = (WhisperModel(modelo, device="cuda", compute_type="float16"), "cuda")
+        except Exception as e:                  # sem GPU: funciona, só que mais devagar
+            print(f"GPU indisponível ({e}); usando CPU", file=sys.stderr)
+            _CARREGADOS[modelo] = (WhisperModel(modelo, device="cpu", compute_type="int8"), "cpu")
+    return _CARREGADOS[modelo]
+
+
+def transcrever(wav_16k, saida_json, modelo="large-v3-turbo", idioma="pt", nomes=()):
+    m, dev = _carregar(modelo)
     with wave.open(wav_16k, "rb") as w:
         if w.getframerate() != 16000 or w.getnchannels() != 1 or w.getsampwidth() != 2:
             raise ValueError("o WAV precisa ser 16 kHz mono 16-bit")

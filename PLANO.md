@@ -14,7 +14,7 @@ Kit para o time de edição produzir **VSLs 9:16 da STLFLIX**. Ele junta o fluxo
 
 1. **Roteiro**: teleprompter com `--- BLOCO N · TÍTULO ---`.
 2. **Gravação** e cópia dos brutos para o Drive.
-3. **Decupagem** no FilmCraft, seguindo `5-guias/estilo-de-edicao.md`.
+3. **Decupagem com o Claude**: transcrição dos brutos → decupagem cruzada com a copy, aprovada pelo editor → montagem no FilmCraft no estilo de `5-guias/estilo-de-edicao.md` (`stlflix decupar`).
 4. **Transcrição** com Whisper, dividida pelos blocos do roteiro.
 5. **Plano de cenas**, escrito pelo editor.
 6. **Render dos motions** no HyperFrames: .mov ProRes 4444 transparente, 1080×1920.
@@ -68,7 +68,7 @@ STLFLIX_EDITOR/
 | 0. Resgatar | Scripts e guias copiados para `4-filmcraft/_legado` e `5-guias` | **feito** |
 | 1. Generalizar | `4-filmcraft/stlflix` (CLI com 11 comandos) lendo o `config.json`; modelo de projeto; exemplo de plano; guia de estilo em português | **feito** — testado numa cópia do VSL-Shark |
 | 2. Template de motions | `3-motions/motions.mjs` (validar, gerar, prévia, render, migrar) + `2-design-system` + guia `5-guias/plano-de-cenas.md` | **feito** — composições idênticas às do Shark e render idêntico pixel a pixel |
-| 3. Instalador | `1-instalacao/instalar.ps1` (`-Verificar`, `-BaixarModelo`) + `stlflix.cmd` + comando `nova` | **feito** — instalação completa testada nesta máquina |
+| 3. Instalador | `1-instalacao/instalar.ps1` (`-Verificar`, `-SemModelo`; baixa o modelo do Whisper se faltar) + `stlflix.cmd` + comando `nova` | **feito** — instalação completa testada nesta máquina |
 | 4. Claude Code | `CLAUDE.md` + 8 skills em `.claude/skills/` + `COMECE-AQUI.md` | **feito** — falta testar com um editor (Fase 6) |
 | 5. Painel | `stlflix painel` → `painel/index.html`: ferramentas (do instalador), status de cada VSL, próximo passo com pedido para copiar, passo a passo e pasta da VSL | **feito** |
 | 6. Piloto | Um editor usa o kit numa VSL real | |
@@ -106,7 +106,7 @@ STLFLIX_EDITOR/
 - Peças 3D: análise, cortes e enquadramento que acompanha a peça.
 - Bake da cor (LUT) a partir da correção do FilmCraft.
 - Reconstrução do áudio perdido na importação de XML.
-- Decupagem automática (cortes por energia, pausas, tropeços e crossfades) — maior, fica para depois do piloto.
+- ~~Decupagem automática~~ → feita: `transcrever-brutos` + `decupar` (porte do `vsl-hugo/montar_corpo2.py`; a escolha dos trechos é do Claude, aprovada pelo editor).
 
 ## Pendências
 

@@ -21,7 +21,8 @@ O kit serve para qualquer VSL de qualquer editor do time. Nenhuma VSL é a "padr
 - **Teste com pouco**: no render de motions, primeiro `--so` com 2 ou 3 cenas. Cada cena leva ~30 s.
 - **Não mexa no projeto se o editor disser que está em outro** ("calma, estou em outro projeto"): pare e espere.
 - Ao fim de cada etapa que mudou a timeline, lembre: **salvar com Ctrl+S** no FilmCraft.
-- O **plano de cenas é do editor**. Você pode sugerir cenas quando ele pedir, mas quem decide o texto é ele.
+- O **plano de cenas é do editor**. Você pode sugerir cenas ou fazer um rascunho quando ele pedir (skill `plano-de-cenas`), mas o rascunho vai em `04-plano-de-cenas/rascunho-<seq>.md` e só passa para o `plano-de-cenas.md` o que ele aprovar.
+- Não apague `05-motions/.registro-render.json`: é como o kit sabe quais motions mudaram no plano depois do render.
 - Processamento sutil (sem efeito "robótico"); B-roll preenche o quadro; inserts só de imagem vão sem áudio.
 
 ## Como rodar
@@ -38,15 +39,18 @@ powershell -ExecutionPolicy Bypass -File 1-instalacao/instalar.ps1 [-Verificar]
 
 | `stlflix` | O que faz | Muda o projeto? |
 |---|---|---|
-| `painel` (sem `--projeto`) | Gera e abre `painel/index.html`: menu para escolher ou criar a VSL, ferramentas instaladas (com o botão do ArtCraft), o que falta na VSL escolhida e o próximo passo | não |
+| `painel` (sem `--projeto`) | Gera e abre `painel/index.html`: menu para escolher ou criar a VSL, ferramentas instaladas (com o botão do ArtCraft), o que falta na VSL escolhida, o próximo passo e a galeria dos motions (miniaturas em `05-motions/_miniaturas`) | não |
 | `vsls [--anotar PASTA] [--tirar VSL]` (sem `--projeto`) | Lista as VSLs deste computador e onde estão; anota uma pasta que já existe ou tira da lista (sem apagar) | não |
 | `escolher-pasta` | Abre a janela "Escolher pasta" do Windows e mostra o caminho escolhido | não |
 | `nova [--nome X] [--campanha bf26]` | Cria a pasta `--projeto` (caminho completo, onde o editor quiser) a partir de `projetos/_MODELO-VSL` e anota a VSL | não |
 | `abrir` | Abre o FilmCraft com o controle ligado e o `.fcproj` do config | não |
 | `status` | O que já está preenchido e gerado | não |
+| `transcrever-brutos [--pasta] [--so] [--refazer]` | Cada take da câmera (`takes.prefixo`) → Whisper → `06-transcricoes/brutos.md`; pega os brutos do FilmCraft aberto, de `02-brutos` ou de `--pasta` | não |
+| `decupar <seq> [--aplicar]` | Mostra os cortes da `06-transcricoes/decupagem-<seq>.md`; `--aplicar` duplica a sequência (backup), tira os brutos dela e monta a decupagem no estilo do time | **com --aplicar** |
 | `transcrever <seq>` | Áudio da sequência → Whisper → documento por blocos em `06-transcricoes` | não |
 | `blocos <seq>` | Refaz só o documento por blocos | não |
 | `plano` | Valida o plano de cenas e lista as cenas sem .mov | não |
+| `gatilhos <seq> [--plano arquivo]` | Confere as frases-gatilho na transcrição (sem FilmCraft nem .mov); serve para rascunho | não |
 | `motions <seq> [--aplicar]` | Mostra o encaixe dos motions nas frases-gatilho; `--aplicar` coloca na V2 | **com --aplicar** |
 | `enquadrar [seqs] [--aplicar]` | Escala e âncora padrão nos takes da câmera | **com --aplicar** |
 | `checar [seqs] [--rapido]` | Checagens antes de exportar | não |
@@ -55,10 +59,16 @@ powershell -ExecutionPolicy Bypass -File 1-instalacao/instalar.ps1 [-Verificar]
 
 | `motions.mjs` | O que faz |
 |---|---|
-| `validar [--plano corpo]` | Confere a linguagem do plano |
+| `validar [--plano corpo]` | Confere a linguagem do plano e se os ícones existem na campanha |
 | `gerar` | Cria a pasta de trabalho do HyperFrames |
 | `previa` | Abre o Studio do HyperFrames |
-| `render [--so B05H,B05I] [--por-parte 30]` | .mov por cena em `05-motions` + prévia sobre o quadro de referência |
+| `render [--so B05H,B05I] [--por-parte 30]` | .mov por cena em `05-motions` + prévia sobre o quadro de referência; a versão anterior vai para `_motions anteriores (data)` |
+| `render --pendentes` | Só as cenas sem .mov ou que mudaram no plano depois do render |
+| `estado` | Situação de cada cena (pronto, falta, mudou, só encaixe), em JSON; o painel usa para a galeria |
+
+Qualquer comando do `motions.mjs` aceita `--arquivo <plano.md>` no lugar do plano do config (ex.: o rascunho).
+
+**Permissões**: `.claude/settings.json` libera os comandos do kit que só leem e pede confirmação para `--aplicar`, `reconectar`, `exportar-xml`, commit/push e apagar arquivos. Não afrouxe essas regras sem o editor pedir.
 
 `<seq>` é a chave em `config.json → sequencias` (`corpo`, `lead-a`…) ou o nome da sequência no FilmCraft.
 
@@ -66,12 +76,12 @@ Quando o editor pedir "abre o painel" (ou quiser saber o que falta), rode `./stl
 
 ## Fluxo de uma VSL
 
-Cada etapa tem uma skill em `.claude/skills/`: `instalar-kit`, `nova-vsl`, `transcrever`, `plano-de-cenas`, `gerar-motions`, `encaixar-motions`, `finalizar`, `problemas`.
+Cada etapa tem uma skill em `.claude/skills/`: `instalar-kit`, `nova-vsl`, `decupar`, `transcrever`, `plano-de-cenas`, `gerar-motions`, `encaixar-motions`, `finalizar`, `problemas`.
 
-1. `nova` → editor preenche `config.json`, `01-roteiro/teleprompter.txt` e as pastas de assets.
-2. Decupagem no FilmCraft (manual, seguindo `5-guias/estilo-de-edicao.md`).
-3. `abrir` → `transcrever <seq>`.
-4. Editor escreve `04-plano-de-cenas/plano-de-cenas.md` a partir da transcrição e da copy (`5-guias/plano-de-cenas.md`).
+1. `nova` → editor preenche `config.json`, `01-roteiro/teleprompter.txt` e as pastas de assets; importa os brutos no projeto do FilmCraft.
+2. `abrir` → `transcrever-brutos`.
+3. **Decupagem com o Claude** (skill `decupar`): Claude escreve `decupagem-<seq>.md` cruzando os brutos com a copy → editor aprova → `decupar <seq> --aplicar` → editor revisa e salva. Depois, `transcrever <seq>` na sequência montada.
+4. Editor escreve `04-plano-de-cenas/plano-de-cenas.md` a partir da transcrição e da copy, ou pede um rascunho (`5-guias/plano-de-cenas.md`).
 5. `motions.mjs render --so …` (teste) → render completo.
 6. `motions <seq>` → aprovação → `--aplicar`; `enquadrar --aplicar`. Editor revisa e salva.
 7. `reconectar` → `checar` (zero erros) → exportar vídeo → `exportar-xml`.

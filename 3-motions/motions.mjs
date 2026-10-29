@@ -5,11 +5,15 @@
 //   node 3-motions/motions.mjs gerar   --projeto <VSL> [--plano corpo]          → pasta de trabalho do HyperFrames
 //   node 3-motions/motions.mjs previa  --projeto <VSL> [--plano corpo]          → abre o Studio do HyperFrames
 //   node 3-motions/motions.mjs render  --projeto <VSL> [--plano corpo] [--so B05H,B05I] [--por-parte 30]
+//   node 3-motions/motions.mjs render  --projeto <VSL> [--plano corpo] --pendentes         → só as que faltam ou mudaram no plano
+//   node 3-motions/motions.mjs validar --projeto <VSL> --arquivo 04-plano-de-cenas/rascunho-corpo.md   → qualquer comando com um plano avulso
+//   node 3-motions/motions.mjs estado  --projeto <VSL>                                 → JSON de cada cena: pronto, falta, mudou (usado pelo painel)
 //   (o modelo visual vem de motions.modelo no config.json; padrão "shark-vsl" → 3-motions/modelos/shark-vsl)
 //   node 3-motions/motions.mjs migrar  --build <build.mjs antigo> --gatilhos <plano com frases> --saida <plano.md>
 //
 // O render sai em <projeto>/<pastas.motions> (um .mov por cena + LEIAME.txt) e a prévia sobre o quadro de
 // referência em <pasta de trabalho>/renders/previa-cenas.mp4.
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -61,6 +65,68 @@ function planoDe(proj, chave) {
   const k = chave || Object.keys(pl)[0];
   if (!pl[k]) throw new Error(`sem plano "${k}" em plano_de_cenas (tem: ${Object.keys(pl).join(", ")})`);
   return { chave: k, arquivo: proj.cam(pl[k]) };
+}
+
+// ───── o que já foi renderizado ─────
+// <pasta de motions>/.registro-render.json guarda a impressão de cada cena no momento do render: se o editor muda a
+// descrição no plano depois, a impressão muda e a cena aparece como "mudou" (o nome e a frase-gatilho não contam).
+const REGISTRO = ".registro-render.json";
+const pastaMotions = (proj) => proj.cam((proj.cfg.pastas || {}).motions || "05-motions");
+
+function impressao(proj, cena) {
+  const { id, nome, ...visual } = cena;
+  return crypto.createHash("sha1").update(JSON.stringify([visual, proj.mv.modelo, proj.mv.campanha, proj.mv.faixa])).digest("hex").slice(0, 12);
+}
+
+function lerRegistro(proj) {
+  try { return JSON.parse(fs.readFileSync(path.join(pastaMotions(proj), REGISTRO), "utf8")); } catch { return {}; }
+}
+
+function movsDaPasta(pasta) {                 // código → arquivo, como o arquivos_motion do stlflix (pastas "_…" são backup)
+  const out = {};
+  const andar = (d) => {
+    if (!fs.existsSync(d)) return;
+    const itens = fs.readdirSync(d, { withFileTypes: true });
+    for (const e of itens) if (e.isFile() && /\.mov$/i.test(e.name)) { const id = e.name.split("-")[0].split(".")[0]; if (!(id in out)) out[id] = path.join(d, e.name); }
+    for (const e of itens) if (e.isDirectory() && !e.name.startsWith("_")) andar(path.join(d, e.name));
+  };
+  andar(pasta);
+  return out;
+}
+
+function situacao(proj, todas) {
+  const movs = movsDaPasta(pastaMotions(proj)), reg = lerRegistro(proj);
+  return todas.map((c) => {
+    const imp = c.cena ? impressao(proj, c.cena) : null;
+    const estado = !c.cena ? "so-encaixe" : !movs[c.id] ? "falta" : reg[c.id] && reg[c.id].impressao !== imp ? "mudou" : "pronto";
+    return { c, estado, mov: movs[c.id] || null };
+  });
+}
+
+function estado(proj) {
+  const pl = proj.cfg.plano_de_cenas || "04-plano-de-cenas/plano-de-cenas.md";
+  const planos = (typeof pl === "string" ? [null] : Object.keys(pl)).map((k) => {
+    const { chave, arquivo } = planoDe(proj, k);
+    if (!fs.existsSync(arquivo)) return { chave, arquivo, existe: false, erros: [], cenas: [] };
+    const { todas, erros } = cenasDoPlano(arquivo);
+    erros.push(...iconesQueFaltam(proj, todas));
+    return { chave, arquivo, existe: true, erros, cenas: situacao(proj, todas).map(({ c, estado, mov }) => ({
+      id: c.id, nome: c.nome, gatilho: c.gatilho, bloco: c.bloco, blocoTitulo: c.blocoTitulo, estado, mov,
+      linhas: c.cena ? cenaParaLinhas(c.cena).map((l) => l.trim()) : [] })) };
+  });
+  process.stdout.write(JSON.stringify({ planos, pasta: pastaMotions(proj) }));
+}
+
+function iconesQueFaltam(proj, todas) {      // ícone com nome errado sai como imagem quebrada no motion, sem aviso
+  const pasta = path.join(DS, "campanhas", proj.mv.campanha);
+  const tem = fs.existsSync(pasta) ? fs.readdirSync(pasta).filter((n) => n.endsWith(".png")).map((n) => n.slice(0, -4)) : [];
+  const erros = [];
+  for (const c of todas) for (const f of (c.cena ? c.cena.fases : [])) for (const e of f.els) {
+    for (const nome of e.k === "ico" ? [e.nome] : e.k === "icos" ? e.nomes : []) {
+      if (!tem.includes(nome)) erros.push(`linha ${c.linha}: ${c.id} usa o ícone "${nome}", que não existe na campanha ${proj.mv.campanha} (tem: ${tem.filter((n) => n !== "logo-kv").join(", ")})`);
+    }
+  }
+  return erros;
 }
 
 function cenasDoPlano(arquivo) {
@@ -116,6 +182,7 @@ function render(construir, proj, chave, cenas, { so, porParte = 30 }) {
   const w = pastaDeTrabalho(proj, chave);
   const alvo = so ? cenas.filter((c) => so.includes(c.id)) : cenas;
   if (!alvo.length) throw new Error("nenhuma cena para renderizar");
+  const imps = new Map(cenas.map((c) => [c.id, impressao(proj, c)]));   // antes do motor, que pode mexer nas cenas
   const R = path.join(w, "renders"), partes = path.join(R, "partes"), saidaCenas = path.join(R, "cenas");
   for (const d of [partes, saidaCenas]) fs.mkdirSync(d, { recursive: true });
   const fonte = path.join(R, "_fonte-etiqueta.ttf");     // Arial Bold do Windows (licença não permite pôr no kit)
@@ -151,10 +218,23 @@ function render(construir, proj, chave, cenas, { so, porParte = 30 }) {
   fs.writeFileSync(lst, previas.map((p) => `file '${p.replace(/\\/g, "/")}'`).join("\n"));
   sh("ffmpeg", ["-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", path.join(R, "previa-cenas.mp4")]);
   for (const p of previas) fs.rmSync(p);
-  // entrega: .mov na pasta de motions do projeto + LEIAME
-  const destino = proj.cam((proj.cfg.pastas || {}).motions || "05-motions");
+  // entrega: .mov na pasta de motions do projeto + LEIAME. A versão anterior de cada cena não é sobrescrita:
+  // vai para "_motions anteriores (dd-mm HHhMM)", e o registro guarda a impressão do que foi renderizado agora.
+  const destino = pastaMotions(proj);
   fs.mkdirSync(destino, { recursive: true });
+  const agora = new Date(), dd = (n) => String(n).padStart(2, "0");
+  const backup = path.join(destino, `_motions anteriores (${dd(agora.getDate())}-${dd(agora.getMonth() + 1)} ${dd(agora.getHours())}h${dd(agora.getMinutes())})`);
+  const refeitos = new Set(feitos.map((f) => f.id));
+  for (const n of fs.readdirSync(destino)) {
+    if (/\.mov$/i.test(n) && refeitos.has(n.split("-")[0].split(".")[0])) {
+      fs.mkdirSync(backup, { recursive: true });
+      fs.renameSync(path.join(destino, n), path.join(backup, n));
+    }
+  }
   for (const f of feitos) fs.copyFileSync(path.join(saidaCenas, f.arquivo), path.join(destino, f.arquivo));
+  const reg = lerRegistro(proj);
+  for (const f of feitos) reg[f.id] = { impressao: imps.get(f.id), arquivo: f.arquivo, quando: agora.toISOString() };
+  fs.writeFileSync(path.join(destino, REGISTRO), JSON.stringify(reg, null, 1));
   const leiame = path.join(destino, "LEIAME.txt");
   const antigas = fs.existsSync(leiame) ? fs.readFileSync(leiame, "utf8").split(/\r?\n/).filter((l) => /^[A-Z]{1,3}\d/.test(l)) : [];
   const linhas = new Map(antigas.map((l) => [l.split(/\s+/)[0], l]));
@@ -194,8 +274,13 @@ async function main() {
   if (o.cmd === "migrar") return migrar(o);
   if (!o.projeto) throw new Error("use --projeto <VSL> (o nome ou a pasta)");
   const proj = projeto(resolverVsl(o.projeto));
-  const { chave, arquivo } = planoDe(proj, o.plano);
+  if (o.cmd === "estado") return estado(proj);
+  // --arquivo: um plano avulso (ex.: o rascunho que o Claude escreveu), a partir da raiz do kit ou da pasta da VSL
+  const { chave, arquivo } = o.arquivo
+    ? { chave: o.plano || "rascunho", arquivo: fs.existsSync(o.arquivo) ? path.resolve(o.arquivo) : proj.cam(o.arquivo) }
+    : planoDe(proj, o.plano);
   const { todas, geraveis, erros } = cenasDoPlano(arquivo);
+  erros.push(...iconesQueFaltam(proj, todas));
   if (o.cmd === "validar" || erros.length) {
     console.log(`${todas.length} cenas em ${arquivo} · ${geraveis.length} com descrição de motion`);
     const sem = todas.filter((c) => !c.cena).map((c) => c.id);
@@ -213,12 +298,17 @@ async function main() {
     return;
   }
   if (o.cmd === "render") {
-    const so = o.so ? String(o.so).split(",").map((s) => s.trim()) : null;
+    let so = o.so ? String(o.so).split(",").map((s) => s.trim()) : null;
+    if (o.pendentes) {
+      so = situacao(proj, todas).filter((s) => s.estado === "falta" || s.estado === "mudou").map((s) => s.c.id);
+      if (!so.length) return console.log("✓ nada pendente: todos os motions do plano estão renderizados e em dia");
+      console.log(`${so.length} pendentes (faltam ou mudaram no plano): ${so.join(", ")}`);
+    }
     const r = render(construir, proj, chave, geraveis, { so, porParte: Number(o["por-parte"]) || 30 });
     console.log(`✓ ${r.feitos.length} motions em ${r.destino}\n  prévia: ${r.previa}`);
     return;
   }
-  throw new Error(`comando desconhecido: ${o.cmd} (validar, gerar, previa, render, migrar)`);
+  throw new Error(`comando desconhecido: ${o.cmd} (validar, gerar, previa, render, estado, migrar)`);
 }
 
 main().catch((e) => { console.error("✗ " + e.message); process.exit(1); });

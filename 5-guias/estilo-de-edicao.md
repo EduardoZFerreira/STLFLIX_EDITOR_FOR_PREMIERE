@@ -28,3 +28,7 @@ Use **Constant Power, centrado no corte**:
 O editor revisa, ajusta e salva (**Ctrl+S**). A automação mostra o que fez e onde; nada é renderizado ou exportado sem a revisão na timeline.
 
 Fluxo técnico, problemas conhecidos e correções: `FilmCraft_Guia_Aprendizados.md`.
+
+## Na decupagem com o Claude
+
+O `stlflix decupar` aplica sozinho os cortes na fala e os crossfades descritos acima (cabeça, cauda, pausas de 0,3 s, 3 e 10 quadros). Quem decide **o que** entra é a decupagem (`06-transcricoes/decupagem-<seq>.md`), que o Claude escreve a partir da transcrição dos brutos e da copy, ficando com a última repetição limpa de cada frase, e o editor aprova antes da montagem.

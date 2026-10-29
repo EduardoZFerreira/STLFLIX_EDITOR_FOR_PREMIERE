@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(./stlflix.cmd *)",
+      "Bash(node 3-motions/motions.mjs *)",
+      "Bash(powershell -ExecutionPolicy Bypass -File 1-instalacao/instalar.ps1 -Verificar*)",
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git fetch*)",
+      "PowerShell(./stlflix.cmd *)",
+      "PowerShell(.\\stlflix.cmd *)",
+      "PowerShell(node 3-motions/motions.mjs *)",
+      "PowerShell(git status*)",
+      "PowerShell(git log*)",
+      "PowerShell(git diff*)",
+      "PowerShell(git fetch*)"
+    ],
+    "ask": [
+      "Bash(* --aplicar*)",
+      "Bash(./stlflix.cmd * reconectar*)",
+      "Bash(./stlflix.cmd * exportar-xml*)",
+      "Bash(git push*)",
+      "Bash(git commit*)",
+      "Bash(git reset*)",
+      "Bash(git checkout*)",
+      "Bash(rm *)",
+      "PowerShell(* --aplicar*)",
+      "PowerShell(*stlflix.cmd * reconectar*)",
+      "PowerShell(*stlflix.cmd * exportar-xml*)",
+      "PowerShell(git push*)",
+      "PowerShell(git commit*)",
+      "PowerShell(git reset*)",
+      "PowerShell(git checkout*)",
+      "PowerShell(Remove-Item*)"
+    ]
+  }
+}

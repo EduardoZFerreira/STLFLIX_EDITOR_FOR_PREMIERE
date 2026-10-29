@@ -4,14 +4,16 @@ STLFLIX_EDITOR - instalador e verificador do ambiente de edição.
 Uso (PowerShell, na raiz do kit):
   powershell -ExecutionPolicy Bypass -File 1-instalacao\instalar.ps1               confere e instala o que faltar
   powershell -ExecutionPolicy Bypass -File 1-instalacao\instalar.ps1 -Verificar    só confere, não instala nada
-  powershell -ExecutionPolicy Bypass -File 1-instalacao\instalar.ps1 -BaixarModelo baixa também o modelo do Whisper (~1,6 GB)
+  powershell -ExecutionPolicy Bypass -File 1-instalacao\instalar.ps1 -SemModelo    instala sem baixar agora o modelo do Whisper
 
 Instala pelo winget: Git, Node.js LTS, Python 3.12, ffmpeg. O FilmCraft vem do ArtCraft Launcher (getartcraft.com) e é
 instalado pelo próprio editor; aqui só conferimos se existe e se a versão aceita o token de controle (0.13+).
 -Json <arquivo> grava o resultado da conferência em JSON (usado pelo painel: stlflix painel).
-Depois cria o ambiente Python em %LOCALAPPDATA%\STLFLIX_EDITOR\venv (fora do OneDrive e do git) com o pacote stlflix, cria o token do FilmCraft e baixa o HyperFrames na versão fixa.
+Depois cria o ambiente Python em %LOCALAPPDATA%\STLFLIX_EDITOR\venv (fora do OneDrive e do git) com o pacote stlflix, cria o token do FilmCraft,
+baixa o HyperFrames na versão fixa e o modelo do Whisper (large-v3-turbo, ~1,6 GB) se ele ainda não estiver no computador.
+-BaixarModelo continua aceito (era o jeito antigo de pedir o modelo; agora ele é baixado por padrão).
 #>
-param([switch]$Verificar, [switch]$BaixarModelo, [string]$Json)
+param([switch]$Verificar, [switch]$SemModelo, [switch]$BaixarModelo, [string]$Json)
 
 $ErrorActionPreference = "Continue"
 $KIT = Split-Path -Parent $PSScriptRoot
@@ -149,10 +151,18 @@ if (-not (Test-Path $ATALHO) -and (Test-Path $VENV_PY) -and -not $Verificar) {
 if (Test-Path $ATALHO) { Anotar $true "Atalho do painel" "na área de trabalho" $false }
 else { Anotar $false "Atalho do painel" "rode o instalador sem -Verificar para criar" $false }
 
-# Modelo do Whisper (opcional: senão baixa na primeira transcrição)
-if ($BaixarModelo -and (Test-Path $VENV_PY)) {
-    Write-Host "    baixando o modelo large-v3-turbo do Whisper (~1,6 GB)..."
-    & $VENV_PY -c "from faster_whisper import WhisperModel; WhisperModel('large-v3-turbo', device='cpu', compute_type='int8')"
+# Modelo do Whisper (transcrição): baixado aqui se ainda não estiver no computador. Se faltar mesmo assim,
+# a primeira transcrição baixa sozinha (stlflix/transcrever.py: garantir_modelo).
+if (Test-Path $VENV_PY) {
+    $temModelo = { & $VENV_PY -c "import sys; from stlflix.transcrever import modelo_baixado; sys.exit(0 if modelo_baixado('large-v3-turbo') else 1)" 2>$null; $LASTEXITCODE -eq 0 }
+    $ok = & $temModelo
+    if (-not $ok -and -not $Verificar -and -not $SemModelo) {
+        Write-Host "    baixando o modelo do Whisper large-v3-turbo (~1,6 GB, só na primeira vez)..."
+        & $VENV_PY -c "from stlflix.transcrever import garantir_modelo; garantir_modelo('large-v3-turbo')"
+        $ok = & $temModelo
+    }
+    if ($ok) { Anotar $true "Modelo do Whisper" "large-v3-turbo no computador" $false }
+    else { Anotar $false "Modelo do Whisper" "ainda não baixado (~1,6 GB): rode o instalador, ou ele baixa sozinho na primeira transcrição" $false }
 }
 
 Write-Host ""

@@ -16,9 +16,13 @@
 | `nova [--nome X]` | Cria a pasta `--projeto` a partir de `projetos/_MODELO-VSL` (o exemplo do plano vira `EXEMPLO-plano-de-cenas.md`) | não |
 | `abrir` | Abre o FilmCraft com o controle ligado (cria o token na primeira vez) e o `.fcproj` do config | não |
 | `status` | Mostra o que já está preenchido: roteiro, plano de cenas, motions, transcrições, sequências | não |
+| `transcrever-brutos [--pasta] [--so] [--refazer]` | Transcreve cada take da câmera (`takes.prefixo`), dos brutos importados no FilmCraft aberto, de `02-brutos` ou de `--pasta`, e escreve `06-transcricoes/brutos.md` (tempo no bruto, pausas, possíveis tropeços) | não |
+| `decupar <seq>` | Mostra os cortes da decupagem aprovada (`06-transcricoes/decupagem-<seq>.md`): clipes por trecho, avisos, crossfades | não |
+| `decupar <seq> --aplicar` | Duplica a sequência (backup), tira dela os brutos usados e monta a decupagem (V1/A1, cortes pela energia, pausas ≥ 0,3 s fora, crossfades 3/10 quadros, marcadores de bloco, Conferir e TELA) | **sim** |
 | `transcrever <seq>` | Exporta o áudio da sequência, transcreve com Whisper e gera o documento por blocos do roteiro. Avisa trechos mudos e possíveis tropeços | não |
 | `blocos <seq>` | Refaz só o documento por blocos (depois de mudar âncoras ou grafias no config) | não |
 | `plano` | Valida o `plano-de-cenas.md` e lista as cenas que ainda não têm `.mov` | não |
+| `gatilhos <seq> [--plano arquivo]` | Confere se cada frase-gatilho do plano (ou de um rascunho) aparece na transcrição e em que tempo. Não precisa do FilmCraft nem dos `.mov` | não |
 | `motions <seq>` | Mostra onde cada motion vai entrar e quais ficam de fora | não |
 | `motions <seq> --aplicar` | Coloca os motions na trilha (V2, escala 200) e liga a trilha | **sim** |
 | `enquadrar [seqs]` | Mostra quantos takes estão fora do enquadramento padrão | não |

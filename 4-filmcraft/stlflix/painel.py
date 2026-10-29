@@ -43,7 +43,48 @@ def atualizacao():
 
 
 def _uri(p):
-    return pathlib.Path(p).as_uri() if os.path.exists(p) else None
+    return pathlib.Path(p).as_uri() if p and os.path.exists(p) else None
+
+
+def estado_motions(pasta):
+    """Cada cena do plano com a situação (pronto, falta, mudou, só encaixe), calculada pelo próprio gerador de motions."""
+    try:
+        r = subprocess.run(["node", os.path.join(KIT, "3-motions", "motions.mjs"), "estado", "--projeto", pasta],
+                           capture_output=True, timeout=120)
+        return json.loads(r.stdout.decode("utf-8")) if r.returncode == 0 else None
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None
+
+
+def miniatura(mov, referencia, pasta):
+    """Quadro do motion sobre o apresentador, cortado no alto (onde fica o motion). Só é refeita quando o .mov muda."""
+    os.makedirs(pasta, exist_ok=True)
+    jpg = os.path.join(pasta, os.path.basename(mov).split("-")[0].split(".")[0] + ".jpg")
+    if os.path.exists(jpg) and os.path.getmtime(jpg) >= os.path.getmtime(mov):
+        return jpg
+    fundo = ["-i", referencia] if referencia and os.path.exists(referencia) else ["-f", "lavfi", "-i", "color=c=0x1c1d28:s=1080x1920"]
+    for t in ("2.2", "0.6"):                       # 2,2 s: a primeira batida já entrou; motion curto cai no 0,6 s
+        if os.path.exists(jpg):
+            os.remove(jpg)
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", t, "-i", mov, *fundo, "-filter_complex",
+                        "[1:v]scale=1080:1920,setsar=1[bg];[bg][0:v]overlay=format=auto,crop=1080:1080:0:0,scale=360:360",
+                        "-frames:v", "1", "-q:v", "5", jpg], capture_output=True, timeout=60)
+        if os.path.exists(jpg) and os.path.getsize(jpg):
+            return jpg
+    return None
+
+
+def galeria(proj, est):
+    """Planos com as cenas para a galeria do painel: miniatura e link do .mov de cada motion pronto."""
+    ref = proj["motions"]["referencia"]
+    ref = proj.caminho(ref) if ref else None
+    pasta = os.path.join(est["pasta"], "_miniaturas")
+    for p in est["planos"]:
+        for c in p["cenas"]:
+            c["mini"] = _uri(miniatura(c["mov"], ref, pasta)) if c["mov"] else None
+            c["mov"] = _uri(c["mov"])
+        p["arquivo"] = os.path.relpath(p["arquivo"], proj.pasta).replace("\\", "/")
+    return est["planos"]
 
 
 def _conteudo(pasta):
@@ -103,12 +144,32 @@ def projeto(pasta):
                         _item(titulo, "aviso", "vazia (tudo bem se estão só no Drive)", pasta=_uri(p)))
 
     feitas = [k for k in seqs if os.path.exists(proj.arquivo_transcricao(k))] if seqs else []
-    falta_tr = [k for k in seqs if k not in feitas]
     pasta_tr = proj.caminho(proj["pastas"]["transcricoes"])
-    if seqs and not falta_tr:
-        itens["transcricao"] = _item("Transcrições", "ok", ", ".join(feitas), pasta=_uri(pasta_tr))
+    pasta_brutos = os.path.join(pasta_tr, "brutos")
+    takes = [n[:-5] for n in _conteudo(pasta_brutos) if n.endswith(".json") and n != "takes.json"]
+    decups = sorted(n for n in _conteudo(pasta_tr) if n.startswith("decupagem-") and n.endswith(".md"))
+    ja_decupada = bool(feitas) and not takes        # a sequência já foi transcrita sem passar pela decupagem do kit
+    if takes:
+        itens["brutos_tr"] = _item("Transcrição dos brutos", "ok", f"{len(takes)} takes · brutos.md", pasta=_uri(pasta_tr))
+    elif ja_decupada:
+        itens["brutos_tr"] = _item("Transcrição dos brutos", "info", "não usada: a sequência já foi decupada")
     else:
-        itens["transcricao"] = _item("Transcrições", "aviso" if feitas else "falta",
+        itens["brutos_tr"] = _item("Transcrição dos brutos", "falta", "cada take da câmera, para o Claude decupar",
+                                   "claude", f"Abre o FilmCraft e transcreve os brutos da {vid}")
+    if decups:
+        itens["decupagem"] = _item("Decupagem", "ok", "escrita: " + ", ".join(decups), pasta=_uri(pasta_tr))
+    elif ja_decupada:
+        itens["decupagem"] = _item("Decupagem", "info", "feita direto no FilmCraft")
+    else:
+        alvo = next(iter(seqs), "corpo")
+        itens["decupagem"] = _item("Decupagem", "falta" if takes else "info",
+                                   "o Claude cruza os brutos com a copy, você aprova e ele monta a sequência" if takes else "depois da transcrição dos brutos",
+                                   "claude" if takes else "voce", f"Faz a decupagem do {alvo} da {vid}" if takes else None)
+    falta_tr = [k for k in seqs if k not in feitas]
+    if seqs and not falta_tr:
+        itens["transcricao"] = _item("Transcrição das sequências", "ok", ", ".join(feitas), pasta=_uri(pasta_tr))
+    else:
+        itens["transcricao"] = _item("Transcrição das sequências", "aviso" if feitas else "falta",
                                      ("feitas: " + ", ".join(feitas) + " · " if feitas else "") + "faltam: " + (", ".join(falta_tr) or "configure as sequências"),
                                      "claude", f"Abre o FilmCraft e transcreve {falta_tr[0] if falta_tr else 'o corpo'} da {vid}", _uri(pasta_tr))
 
@@ -122,8 +183,8 @@ def projeto(pasta):
         erros += plano.validar(cenas)
     pasta_pl = os.path.dirname(proj.plano()[0])
     if faltam_planos and not ids:
-        itens["plano"] = _item("Plano de cenas", "falta", f"escreva {faltam_planos[0]} (tem um exemplo na pasta)",
-                               pasta=_uri(pasta_pl))
+        itens["plano"] = _item("Plano de cenas", "falta", f"escreva {faltam_planos[0]} (tem um exemplo na pasta), ou peça um rascunho ao Claude",
+                               "voce", f"Faz um rascunho do plano de cenas da {vid}", _uri(pasta_pl))
     elif erros or faltam_planos:
         itens["plano"] = _item("Plano de cenas", "aviso",
                                f"{len(ids)} cenas · " + "; ".join(erros[:2] + [f"falta {f}" for f in faltam_planos]),
@@ -139,15 +200,23 @@ def projeto(pasta):
     pasta_mov = proj.caminho(proj["pastas"]["motions"])
     movs = arquivos_motion(pasta_mov) if os.path.isdir(pasta_mov) else {}
     sem = [i for i in ids if i not in movs]
+    est = estado_motions(proj.pasta)
+    mudaram = [c["id"] for p in (est or {}).get("planos", []) for c in p["cenas"] if c["estado"] == "mudou"]
+    txt_mudaram = f"{len(mudaram)} mudaram no plano depois do render ({', '.join(mudaram[:4])}{' …' if len(mudaram) > 4 else ''})"
     if not ids:
         itens["motions"] = _item("Motions criados", "falta", "depois do plano de cenas", pasta=_uri(pasta_mov))
-    elif not sem:
+    elif not sem and not mudaram:
         itens["motions"] = _item("Motions criados", "ok", f"todos os {len(ids)} prontos", pasta=_uri(pasta_mov))
+    elif not sem:
+        itens["motions"] = _item("Motions criados", "aviso", f"todos os {len(ids)} criados · {txt_mudaram}",
+                                 "claude", f"Refaz os motions que mudaram da {vid}", _uri(pasta_mov))
     else:
         feitos = len(ids) - len(sem)
         itens["motions"] = _item("Motions criados", "aviso" if feitos else "falta",
-                                 f"{feitos} de {len(ids)} prontos · faltam {', '.join(sem[:6])}{' …' if len(sem) > 6 else ''}",
-                                 "claude", f"Cria os motions {' e '.join(sem[:2])} da {vid} para eu ver" if not feitos else f"Cria os motions que faltam da {vid}",
+                                 f"{feitos} de {len(ids)} prontos · faltam {', '.join(sem[:6])}{' …' if len(sem) > 6 else ''}"
+                                 + (f" · {txt_mudaram}" if mudaram else ""),
+                                 "claude", f"Cria os motions {' e '.join(sem[:2])} da {vid} para eu ver" if not feitos else
+                                 f"Cria os motions que faltam da {vid}" + (" e refaz os que mudaram" if mudaram else ""),
                                  _uri(pasta_mov))
 
     pasta_exp = proj.caminho(proj["pastas"]["exports"])
@@ -155,14 +224,15 @@ def projeto(pasta):
     itens["exports"] = _item("Exports", "ok" if n else "info", f"{n} arquivos" if n else "nada exportado ainda", pasta=_uri(pasta_exp))
 
     proximo = None
-    for k in ("filmcraft", "sequencias", "roteiro", "transcricao", "plano", "motions"):
+    for k in ("filmcraft", "sequencias", "roteiro", "brutos_tr", "decupagem", "transcricao", "plano", "motions"):
         if itens[k]["estado"] in ("falta", "aviso"):
             proximo = itens[k]
             break
     if proximo is None:
         proximo = _item("Encaixar e entregar", "info", "motions prontos: coloque na timeline, revise e cheque antes de exportar",
                         "claude", f"Coloca os motions no {next(iter(seqs))} da {vid} e checa antes de exportar" if seqs else None)
-    return dict(id=vid, nome=nome, pasta=proj.pasta, uri=_uri(proj.pasta), itens=list(itens.values()), proximo=proximo)
+    return dict(id=vid, nome=nome, pasta=proj.pasta, uri=_uri(proj.pasta), itens=list(itens.values()), proximo=proximo,
+                galeria=galeria(proj, est) if est else None)
 
 
 def gerar(abrir=True):

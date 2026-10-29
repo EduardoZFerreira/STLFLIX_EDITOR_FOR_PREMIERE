@@ -7,10 +7,15 @@ node 3-motions/motions.mjs validar --projeto <VSL> [--plano corpo]
 node 3-motions/motions.mjs gerar   --projeto <VSL> [--plano corpo]     cria/atualiza a pasta de trabalho
 node 3-motions/motions.mjs previa  --projeto <VSL> [--plano corpo]     abre o Studio do HyperFrames
 node 3-motions/motions.mjs render  --projeto <VSL> [--plano corpo] [--so B05H,B05I] [--por-parte 30]
+node 3-motions/motions.mjs render  --projeto <VSL> [--plano corpo] --pendentes        só as que faltam ou mudaram no plano
+node 3-motions/motions.mjs estado  --projeto <VSL>                                   JSON com a situação de cada cena (usado pelo painel)
 node 3-motions/motions.mjs migrar  --build <build.mjs antigo> --gatilhos <plano com frases> --saida <plano.md>
 ```
 
-- `render` grava um .mov por cena em `<projeto>/05-motions` (com `LEIAME.txt`) e a prévia sobre o quadro de referência em `<projeto>/motions-hf/<plano>/renders/previa-cenas.mp4`.
+`--arquivo <plano.md>` troca o plano do config por um arquivo avulso em qualquer comando (ex.: validar ou renderizar o rascunho `04-plano-de-cenas/rascunho-corpo.md`).
+
+- `validar` confere a linguagem do plano e se os ícones usados existem na campanha.
+- `render` grava um .mov por cena em `<projeto>/05-motions` (com `LEIAME.txt`) e a prévia sobre o quadro de referência em `<projeto>/motions-hf/<plano>/renders/previa-cenas.mp4`. A versão anterior de cada cena refeita vai para `05-motions/_motions anteriores (data)`, e `05-motions/.registro-render.json` guarda a impressão da cena no momento do render: se a descrição muda no plano depois, a cena aparece como "mudou" (o nome e a frase-gatilho não contam).
 - Use `--so` para testar poucas cenas antes do render completo: cada cena leva cerca de meio minuto.
 - O render é feito em partes (30 cenas por vez), porque o HyperFrames guarda cada quadro em PNG e o reel inteiro não cabe no disco temporário.
 

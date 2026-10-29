@@ -145,7 +145,11 @@ details.ferr-det summary { cursor: pointer; color: var(--accent-text); font-size
 .passo .colunas p:last-child { margin: 0; }
 
 /* plano de cenas */
-.plano-grade { display: grid; grid-template-columns: 1.25fr .75fr; gap: 24px; align-items: start; }
+.plano-grade { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 32px; align-items: stretch; }
+/* a foto acompanha a altura do texto ao lado (mostra o alto do quadro, onde fica o motion) */
+.resultado { position: relative; }
+.resultado figure { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.resultado figure img { flex: 1; min-height: 0; object-fit: cover; object-position: center top; }
 .codigo { background: #0a0b10; border: 1px solid var(--line); border-radius: 14px; padding: 18px; font: 14px/1.7 ui-monospace, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
 .codigo .c1 { color: #6b6e80; }
 .codigo .id { color: var(--cta); font-weight: 700; }
@@ -212,6 +216,33 @@ details.ferr-det summary { cursor: pointer; color: var(--accent-text); font-size
 .vsl-pasta { color: var(--text-dim); font: 12.5px ui-monospace, Consolas, monospace; overflow-wrap: anywhere; margin: -2px 0 10px; }
 .alerta { margin-top: 14px; background: rgba(255,92,92,.08); border: 1px solid rgba(255,92,92,.3); border-radius: var(--radius); padding: 14px 16px; }
 
+/* galeria de motions */
+.gal-barra { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+.filtro { background: var(--surface); border: 1px solid var(--line); color: var(--text-dim); border-radius: 99px; padding: 6px 14px;
+  font: 600 13px "Inter", sans-serif; cursor: pointer; }
+.filtro[aria-pressed="true"] { background: var(--accent-soft); border-color: rgba(86,101,240,.5); color: var(--text); }
+.filtro b { color: var(--text); margin-left: 6px; }
+.gal-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr)); gap: 12px; align-items: start; }
+.gal-bloco { grid-column: 1 / -1; font: 600 12px "Inter", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim);
+  margin-top: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.motion { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.motion .mini { display: block; aspect-ratio: 1; background: var(--surface-2); }
+.motion .mini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.motion .vazio { display: grid; place-items: center; aspect-ratio: 1; padding: 16px; text-align: center; font-size: 13px; color: var(--text-dim);
+  background: repeating-linear-gradient(135deg, var(--surface-2) 0 10px, #181924 10px 20px); }
+.motion .corpo { padding: 12px 14px 14px; display: grid; gap: 6px; }
+.motion .cab { display: flex; align-items: center; gap: 8px; }
+.motion .cod { font: 700 13px ui-monospace, Consolas, monospace; color: var(--cta); }
+.selo { margin-left: auto; font: 600 11.5px "Inter", sans-serif; padding: 2px 9px; border-radius: 99px; white-space: nowrap; }
+.selo.pronto { background: rgba(61,220,132,.14); color: var(--ok); }
+.selo.mudou { background: rgba(245,185,66,.16); color: var(--aviso); }
+.selo.falta { background: rgba(255,92,92,.14); color: var(--falta); }
+.selo.so-encaixe { background: var(--surface-2); color: var(--text-dim); }
+.motion .nome { font-weight: 600; font-size: 14.5px; line-height: 1.35; }
+.motion .gat { color: var(--text-dim); font-size: 13px; font-style: italic; line-height: 1.4; }
+.motion .desc { font: 12px/1.5 ui-monospace, Consolas, monospace; color: #9fd7ff; background: #0a0b10; border-radius: 8px; padding: 8px 10px;
+  white-space: pre-wrap; overflow-wrap: anywhere; max-height: 10.5em; overflow: auto; }
+
 footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--text-dim); font-size: 13.5px; }
 
 @media (max-width: 1400px) {
@@ -224,6 +255,7 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
   .encaixe-fluxo { grid-template-columns: 1fr; }
   .encaixe-fluxo .seta { transform: rotate(90deg); justify-self: center; }
   .resultado { max-width: 360px; }
+  .resultado figure { position: static; }
 }
 @media (max-width: 560px) {
   .topo nav, .topo-in > b, .escolha > span { display: none; }
@@ -252,10 +284,10 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
   <div id="aviso-kit" hidden></div>
   <section class="hero" id="comecar">
     <h1>Edite a VSL. <em>O Claude cuida do repetitivo.</em></h1>
-    <p class="lead">Este kit junta você, o <b>FilmCraft</b> e um assistente, o <b>Claude</b>. Você continua editando como sempre. O Claude escreve tudo o que foi falado no vídeo, cria os letterings animados da STLFLIX (os <b>motions</b>) a partir do que você planejar e coloca cada um no segundo certo da timeline.</p>
+    <p class="lead">Este kit junta você, o <b>FilmCraft</b> e um assistente, o <b>Claude</b>. Você continua no comando da edição. O Claude transcreve os brutos, monta a decupagem a partir da copy para você revisar, cria os letterings animados da STLFLIX (os <b>motions</b>) a partir do que você planejar e coloca cada um no segundo certo da timeline.</p>
     <div class="promessas">
-      <div class="promessa"><div class="ico">🎬</div><h3>Você edita</h3><p>Decupagem, ritmo e escolha dos takes continuam com você, no FilmCraft.</p></div>
-      <div class="promessa"><div class="ico">⚡</div><h3>O Claude faz o repetitivo</h3><p>Transcrever, desenhar dezenas de motions e encaixar cada um no tempo da fala.</p></div>
+      <div class="promessa"><div class="ico">🎬</div><h3>Você edita</h3><p>Aprova a decupagem, decide ritmo e acabamento e dá a palavra final na timeline do FilmCraft.</p></div>
+      <div class="promessa"><div class="ico">⚡</div><h3>O Claude faz o repetitivo</h3><p>Transcrever os brutos, montar a decupagem, desenhar dezenas de motions e encaixar cada um no tempo da fala.</p></div>
       <div class="promessa"><div class="ico">✋</div><h3>Nada muda sem você aprovar</h3><p>Antes de mexer na timeline, ele mostra o que vai fazer e espera o seu “pode”.</p></div>
     </div>
 
@@ -276,6 +308,12 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
       <span><i class="dot" style="background:var(--falta)"></i>falta</span>
       <span><i class="dot"></i>ainda não é a hora</span>
     </div>
+  </section>
+
+  <section class="bloco" id="motions" hidden>
+    <h2>Motions da VSL</h2>
+    <p class="intro">Cada cena do plano de cenas, com o motion ao lado. Clique na imagem para abrir o vídeo. “Mudou” quer dizer que a descrição da cena foi alterada no plano depois que o motion foi criado: ele precisa ser refeito.</p>
+    <div id="galeria"></div>
   </section>
 
   <section class="bloco" id="conversar">
@@ -305,8 +343,8 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
     <p class="intro">Uma VSL passa por 7 etapas. Em cada uma, veja quem faz, o que acontece e o que pedir ao Claude.</p>
     <div class="trilha">
       <a href="#p1"><span class="n">1</span>Criar a VSL<small>juntos</small></a>
-      <a href="#p2"><span class="n">2</span>Decupar<small>você</small></a>
-      <a href="#p3"><span class="n">3</span>Transcrever<small>Claude</small></a>
+      <a href="#p2"><span class="n">2</span>Transcrever os brutos<small>Claude</small></a>
+      <a href="#p3"><span class="n">3</span>Decupar<small>Claude monta, você revisa</small></a>
       <a href="#p4"><span class="n">4</span>Plano de cenas<small>você</small></a>
       <a href="#p5"><span class="n">5</span>Criar os motions<small>Claude</small></a>
       <a href="#p6"><span class="n">6</span>Pôr na timeline<small>Claude + você revisa</small></a>
@@ -322,27 +360,29 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
         </div>
       </div></div>
       <div class="passo" id="p2"><div class="num">2</div><div>
-        <h3>Decupar <span class="quem-faz voce">você</span></h3>
-        <p>A edição da fala é sua, no FilmCraft, como você já faz: escolher os takes, tirar pausas e tropeços, ajustar os cortes. O guia de estilo do time está em <code>5-guias/estilo-de-edicao.md</code>.</p>
+        <h3>Transcrever os brutos <span class="quem-faz claude">Claude</span></h3>
+        <p>Importe os takes da câmera no projeto do FilmCraft (ou deixe na pasta <code>02-brutos</code>). O Claude “ouve” cada take e escreve tudo o que foi falado, com o tempo de cada frase no bruto, e marca onde parece ter tropeço ou frase repetida. Com placa NVIDIA, leva cerca de 1 minuto para cada 10 minutos de bruto; sem ela, bem mais.</p>
         <div class="colunas">
-          <div><div class="rotulo">Resultado</div><p>As sequências decupadas (corpo e leads), salvas no projeto.</p></div>
-          <div><div class="rotulo">Dica</div><p>Se o Claude for ajudar depois, mantenha os nomes das sequências iguais aos que você passou no passo 1.</p></div>
+          <div><div class="rotulo">Resultado</div><p>Um documento com a fala de todos os takes (<code>brutos.md</code>), que é a base da decupagem.</p></div>
+          <div><div class="rotulo">Peça</div><div class="pedido"><span>Abre o FilmCraft e transcreve os brutos</span><button>copiar</button></div></div>
         </div>
       </div></div>
       <div class="passo" id="p3"><div class="num">3</div><div>
-        <h3>Transcrever <span class="quem-faz claude">Claude</span></h3>
-        <p>O Claude “ouve” a sequência e escreve tudo o que foi falado, com o minuto e o segundo de cada frase, separado pelos blocos do roteiro. Com placa NVIDIA, leva cerca de 1 minuto para cada 10 minutos de vídeo; sem ela, bem mais. Ele também avisa se encontrar trecho sem áudio ou palavra repetida que escapou na decupagem.</p>
+        <h3>Decupar <span class="quem-faz juntos">Claude monta, você revisa</span></h3>
+        <p>O Claude cruza a transcrição dos brutos com a copy, bloco a bloco: fica com a melhor versão de cada frase (a última repetição limpa, mais perto da copy), descarta tropeços e conversa de set, e anota onde a fala fugiu da copy. Ele te mostra a decupagem; você aprova ou muda. Aí ele monta a sequência no FilmCraft no padrão do time (<code>5-guias/estilo-de-edicao.md</code>): pontas pela energia do áudio, pausas cortadas, crossfades de 3 e 10 quadros e marcadores “Conferir” e “TELA”. Antes de montar, ele duplica a sequência como backup.</p>
         <div class="colunas">
-          <div><div class="rotulo">Resultado</div><p>Um documento com a fala dividida por blocos, para você ler e escrever o plano de cenas.</p></div>
-          <div><div class="rotulo">Peça</div><div class="pedido"><span>Abre o FilmCraft e transcreve o corpo</span><button>copiar</button></div></div>
+          <div><div class="rotulo">Você faz</div><p>Revisa a timeline, ajusta o que quiser e salva com <b>Ctrl+S</b>. Depois peça para ele transcrever a sequência montada: é dela que saem as frases-gatilho do plano de cenas.</p></div>
+          <div><div class="rotulo">Peça</div><div class="pedido"><span>Faz a decupagem do corpo</span><button>copiar</button></div>
+            <div class="pedido" style="margin-top:8px"><span>Transcreve o corpo decupado</span><button>copiar</button></div></div>
         </div>
       </div></div>
       <div class="passo" id="p4"><div class="num">4</div><div>
         <h3>Escrever o plano de cenas <span class="quem-faz voce">você</span></h3>
-        <p>Aqui entra o olhar de editor: com a transcrição e a copy na mão, você decide onde cada motion aparece e o que ele mostra. É um arquivo de texto simples, explicado logo abaixo, em <a href="#plano">O plano de cenas</a>. O Claude pode sugerir ideias e conferir se está tudo no formato certo, mas quem decide é você.</p>
+        <p>Aqui entra o olhar de editor: com a transcrição e a copy na mão, você decide onde cada motion aparece e o que ele mostra. É um arquivo de texto simples, explicado logo abaixo, em <a href="#plano">O plano de cenas</a>. Para não começar do zero, peça um <b>rascunho</b>: o Claude lê a transcrição e a copy e propõe as cenas de um bloco (ou de todos) num arquivo separado. Você corta, troca e aprova; só o que você aprovar vai para o plano.</p>
         <div class="colunas">
           <div><div class="rotulo">Resultado</div><p>O <code>plano-de-cenas.md</code> da VSL, com todos os motions.</p></div>
-          <div><div class="rotulo">Peça</div><div class="pedido"><span>Confere meu plano de cenas</span><button>copiar</button></div></div>
+          <div><div class="rotulo">Peça</div><div class="pedido"><span>Faz um rascunho do plano do bloco 5</span><button>copiar</button></div>
+            <div class="pedido" style="margin-top:8px"><span>Confere meu plano de cenas</span><button>copiar</button></div></div>
         </div>
       </div></div>
       <div class="passo" id="p5"><div class="num">5</div><div>
@@ -435,6 +475,7 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
       <div class="termo"><b>Kit</b><span>A pasta <code class="kit-pasta">C:\STLFLIX_EDITOR</code>: instruções, ferramentas e o visual da STLFLIX que o Claude usa. As suas VSLs ficam fora dela.</span></div>
       <div class="termo"><b>Sequência</b><span>Uma timeline dentro do projeto do FilmCraft, como “Corpo decupado” ou “Lead A”.</span></div>
       <div class="termo"><b>Transcrição</b><span>O texto de tudo o que foi falado na sequência, com o tempo de cada frase.</span></div>
+      <div class="termo"><b>Decupagem</b><span>A escolha dos trechos de cada take que entram no vídeo, na ordem da copy. O Claude propõe a partir da transcrição dos brutos; você aprova e revisa na timeline.</span></div>
       <div class="termo"><b>Motion</b><span>Lettering animado com o visual da STLFLIX (títulos, números, ícones) que aparece sobre o apresentador.</span></div>
       <div class="termo"><b>Plano de cenas</b><span>O arquivo onde você lista os motions: em que frase entram e o que mostram.</span></div>
       <div class="termo"><b>Frase-gatilho</b><span>As palavras faladas no momento em que o motion deve aparecer. É como o Claude acha o lugar dele.</span></div>
@@ -566,7 +607,9 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
         '<p style="margin-bottom:6px">Ao abrir o Claude Code, avise em qual VSL vai trabalhar:</p>' + pedido("Vamos trabalhar na " + atual.id) +
         '<div class="proximo" style="margin:16px 0 12px"><div class="rotulo">Próximo passo</div><p><b>' + esc(px.titulo) + "</b>: " + esc(px.detalhe) + "</p>" +
         (px.pedido ? pedido(px.pedido) : '<p class="dim" style="margin:0">Essa parte é com você.</p>') + "</div>" +
-        '<p style="margin:0;font-size:14px"><a href="#suas-vsls">ver tudo desta VSL</a> · <button class="linkbtn" data-ir="escolher">trocar de VSL</button></p>';
+        '<p style="margin:0;font-size:14px"><a href="#suas-vsls">ver tudo desta VSL</a> · ' +
+        (atual.galeria && atual.galeria.some(function (p) { return p.cenas.length; }) ? '<a href="#motions">ver os motions</a> · ' : "") +
+        '<button class="linkbtn" data-ir="escolher">trocar de VSL</button></p>';
     }
     desenharAndamento();
   }
@@ -574,6 +617,7 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
   function desenharAndamento() {
     var sec = document.getElementById("suas-vsls");
     sec.hidden = modo !== "vsl";
+    desenharGaleria();
     if (sec.hidden) return;
     var p = atual, c = contagem(p), px = p.proximo;
     document.getElementById("projetos").innerHTML = '<div class="vsl"><div class="vsl-topo"><h3>' + esc(p.nome) + "</h3>" +
@@ -586,6 +630,54 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
           (i.pasta ? '<a href="' + esc(i.pasta) + '">abrir pasta</a>' : "") + "</div></div>";
       }).join("") + "</div></div>";
   }
+
+  // galeria: cada cena do plano com a miniatura do motion e a situação (pronto, mudou, falta)
+  var ROTULO = { pronto: "pronto", mudou: "mudou", falta: "falta criar", "so-encaixe": "só encaixe" };
+  var gal = { plano: 0, filtro: "todos" };
+  function desenharGaleria() {
+    var sec = document.getElementById("motions");
+    var planos = modo === "vsl" && atual.galeria ? atual.galeria.filter(function (p) { return p.cenas.length; }) : [];
+    sec.hidden = !planos.length;
+    if (sec.hidden) return;
+    if (gal.plano >= planos.length) gal.plano = 0;
+    var pl = planos[gal.plano];
+    var conta = { todos: pl.cenas.length, pronto: 0, mudou: 0, falta: 0 };
+    pl.cenas.forEach(function (c) { if (conta[c.estado] !== undefined) conta[c.estado]++; });
+    var html = '<div class="gal-barra">' +
+      (planos.length > 1 ? planos.map(function (p, i) {
+        return '<button class="filtro" data-plano="' + i + '" aria-pressed="' + (i === gal.plano) + '">Plano ' + esc(p.chave) + "</button>";
+      }).join("") + '<span style="width:12px"></span>' : "") +
+      [["todos", "Todos"], ["pronto", "Prontos"], ["mudou", "Mudaram"], ["falta", "Faltam"]].map(function (f) {
+        return '<button class="filtro" data-filtro="' + f[0] + '" aria-pressed="' + (gal.filtro === f[0]) + '">' + f[1] + "<b>" + conta[f[0]] + "</b></button>";
+      }).join("") + "</div>";
+    if (conta.mudou || conta.falta) {
+      html += '<div class="proximo"><div class="rotulo">Para deixar em dia</div><p>' +
+        [conta.falta ? conta.falta + " ainda não foram criados" : "", conta.mudou ? conta.mudou + " mudaram no plano depois de criados" : ""].filter(Boolean).join(" e ") +
+        ".</p>" + pedido((conta.falta ? "Cria os motions pendentes da " : "Refaz os motions que mudaram da ") + atual.id) + "</div>";
+    }
+    var bloco = null, cards = [];
+    pl.cenas.forEach(function (c) {
+      if (gal.filtro !== "todos" && c.estado !== gal.filtro) return;
+      if (c.bloco !== bloco) {
+        bloco = c.bloco;
+        cards.push('<div class="gal-bloco">Bloco ' + esc(c.bloco) + (c.blocoTitulo ? " · " + esc(c.blocoTitulo) : "") + "</div>");
+      }
+      var img = c.mini ? '<a class="mini" href="' + esc(c.mov) + '" title="Abrir o motion ' + esc(c.id) + '"><img loading="lazy" src="' + esc(c.mini) + '" alt="Motion ' + esc(c.id) + '"></a>'
+        : '<div class="vazio">' + (c.estado === "so-encaixe" ? "Sem descrição no plano: só entra no encaixe" : c.mov ? "Motion criado, sem miniatura" : "Ainda não criado") + "</div>";
+      cards.push('<div class="motion">' + img + '<div class="corpo"><div class="cab"><span class="cod">' + esc(c.id) + '</span><span class="selo ' + esc(c.estado) + '">' +
+        ROTULO[c.estado] + '</span></div><div class="nome">' + esc(c.nome) + '</div><div class="gat">“' + esc(c.gatilho) + "”</div>" +
+        (c.linhas.length ? '<div class="desc">' + esc(c.linhas.join("\n")) + "</div>" : "") + "</div></div>");
+    });
+    html += '<div class="gal-grade">' + (cards.length ? cards.join("") : '<p class="dim">Nenhuma cena neste filtro.</p>') + "</div>";
+    document.getElementById("galeria").innerHTML = html;
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-filtro], [data-plano]");
+    if (!b) return;
+    if (b.dataset.filtro) gal.filtro = b.dataset.filtro;
+    else { gal.plano = Number(b.dataset.plano); gal.filtro = "todos"; }
+    desenharGaleria();
+  });
 
   menu.addEventListener("change", function () {
     if (menu.value === "__nova") { modo = "nova"; desenhar(); }

@@ -12,8 +12,9 @@ description: Renderiza os motions do plano de cenas no HyperFrames (modelo Shark
 3. Para olhar e ajustar ao vivo: `node 3-motions/motions.mjs previa --projeto <VSL>` abre o Studio do HyperFrames.
 4. Render completo só com o pedido do editor. Avise o tempo estimado (nº de cenas × ~30 s) e rode em segundo plano:
    `node 3-motions/motions.mjs render --projeto <VSL>`
-   Para refazer só as cenas que mudaram, use `--so` com os ids.
-5. Os `.mov` (ProRes 4444, 1080×1920, 30 fps, com transparência) vão para `05-motions` com um `LEIAME.txt`. Antes de regravar, confira se não há `.mov` aprovados que o editor quer guardar; se houver, mova para `05-motions/_anteriores (data)`.
+5. **Pendentes** ("cria os motions pendentes", "refaz os que mudaram"): `render --pendentes` faz só as cenas que ainda não têm `.mov` ou cuja descrição mudou no plano depois do render. Antes, mostre a lista: `node 3-motions/motions.mjs estado --projeto <VSL>` (cada cena com `pronto`, `falta`, `mudou` ou `so-encaixe`). Mais de 3 cenas pendentes e o editor ainda não viu nenhuma? Teste primeiro com `--so`.
+6. Os `.mov` (ProRes 4444, 1080×1920, 30 fps, com transparência) vão para `05-motions` com um `LEIAME.txt`. A versão anterior de uma cena refeita não é sobrescrita: vai sozinha para `05-motions/_motions anteriores (dd-mm HHhMM)`. O `05-motions/.registro-render.json` guarda a impressão de cada cena renderizada (é como o kit sabe o que "mudou"): não apague.
+7. Ao terminar, lembre que o painel (atalho "Painel STLFLIX" ou `./stlflix.cmd painel`) mostra a **galeria** dos motions, com uma imagem de cada um e o que ainda falta.
 
 ## Cuidados
 

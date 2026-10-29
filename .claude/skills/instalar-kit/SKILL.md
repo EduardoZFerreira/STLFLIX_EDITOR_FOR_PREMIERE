@@ -15,7 +15,7 @@ description: Instala ou confere o ambiente do STLFLIX_EDITOR (Git, Node, Python,
    Rode em segundo plano e avise quando terminar.
 4. Se o Git, Node, Python ou ffmpeg acabaram de ser instalados pelo winget, o terminal atual não enxerga: peça para fechar e abrir o Claude Code (ou o terminal) e rode `-Verificar` de novo.
 5. **FilmCraft não é instalado pelo script.** O editor baixa o **ArtCraft Launcher** em https://getartcraft.com, instala o FilmCraft por ele e mantém na versão **0.13 ou mais nova**. O script só confere `C:\Program Files\FilmCraft\filmcraft.exe`.
-6. Opcional: `-BaixarModelo` baixa já o modelo do Whisper (~1,6 GB); senão ele baixa na primeira transcrição.
+6. O instalador baixa o modelo do Whisper (large-v3-turbo, ~1,6 GB) se ele ainda não estiver no computador; avise o editor que demora na primeira vez. Internet lenta? `-SemModelo` pula essa parte, e a primeira transcrição baixa sozinha.
 
 ## Itens que podem ficar como aviso
 
