@@ -86,8 +86,16 @@ if (Test-Path $FC_EXE) {
 $gpu = Tem nvidia-smi
 if ($gpu) { Anotar $true "Placa NVIDIA" ((nvidia-smi --query-gpu=name --format=csv,noheader) | Select-Object -First 1) $false }
 else { Anotar $false "Placa NVIDIA" "sem GPU: a transcrição funciona, só que mais devagar" $false }
-if (Test-Path "G:\") { Anotar $true "Google Drive (G:)" "conectado" $false }
-else { Anotar $false "Google Drive (G:)" "não encontrado: brutos e entregas ficam no Drive compartilhado" $false }
+# o Drive para computador costuma ser G:, mas a letra muda de máquina para máquina (o kit acha sozinho: stlflix/midia.py)
+$drive = $null
+foreach ($l in [char[]]"GHIJKLMNOPQRSTUVWXYZDEF") {
+    foreach ($n in @("Drives compartilhados", "Shared drives", "Meu Drive", "My Drive")) {
+        if (Test-Path -LiteralPath "${l}:\$n") { $drive = "${l}:"; break }
+    }
+    if ($drive) { break }
+}
+if ($drive) { Anotar $true "Google Drive" "conectado em $drive" $false }
+else { Anotar $false "Google Drive" "não encontrado: brutos e entregas ficam no Drive compartilhado" $false }
 
 Write-Host ""
 Write-Host "Ambiente do kit"
@@ -125,6 +133,21 @@ if ($node) {
     $hv = cmd /d /s /c "npx --yes hyperframes@$HF_VERSAO --version 2>nul"
     if ($LASTEXITCODE -eq 0) { Anotar $true "HyperFrames" "$HF_VERSAO" } else { Anotar $false "HyperFrames" "não foi possível rodar npx hyperframes@$HF_VERSAO" }
 }
+
+# Atalho do painel na área de trabalho (abre o painel atualizado sem precisar pedir ao Claude)
+$ATALHO = Join-Path ([Environment]::GetFolderPath("Desktop")) "Painel STLFLIX.lnk"
+if (-not (Test-Path $ATALHO) -and (Test-Path $VENV_PY) -and -not $Verificar) {
+    $lnk = (New-Object -ComObject WScript.Shell).CreateShortcut($ATALHO)
+    $lnk.TargetPath = $env:ComSpec
+    $lnk.Arguments = "/c `"`"$(Join-Path $KIT 'stlflix.cmd')`" painel`""
+    $lnk.WorkingDirectory = $KIT
+    $lnk.WindowStyle = 7
+    $lnk.IconLocation = "$env:SystemRoot\System32\imageres.dll,1"
+    $lnk.Description = "Painel do editor STLFLIX: escolher a VSL, ver o que falta e o próximo passo"
+    $lnk.Save()
+}
+if (Test-Path $ATALHO) { Anotar $true "Atalho do painel" "na área de trabalho" $false }
+else { Anotar $false "Atalho do painel" "rode o instalador sem -Verificar para criar" $false }
 
 # Modelo do Whisper (opcional: senão baixa na primeira transcrição)
 if ($BaixarModelo -and (Test-Path $VENV_PY)) {

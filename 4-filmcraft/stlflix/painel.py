@@ -1,7 +1,8 @@
 """Painel do editor: página local com as ferramentas instaladas e o que já está preenchido em cada VSL.
 
 stlflix painel gera painel/index.html a partir de painel/modelo.html (dados embutidos em JSON) e abre no navegador.
-Só lê: não cria pastas nem conecta no FilmCraft. As ferramentas vêm do próprio instalador (-Verificar -Json).
+Só lê: não cria pastas nem conecta no FilmCraft. As ferramentas vêm do próprio instalador (-Verificar -Json);
+as VSLs, da lista deste computador (vsls.py).
 """
 import datetime
 import json
@@ -10,12 +11,11 @@ import pathlib
 import subprocess
 import tempfile
 
-from . import plano
+from . import plano, vsls
 from .blocos import ler_roteiro
 from .motions import arquivos_motion
 from .projeto import Projeto
-
-KIT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from .vsls import KIT
 
 
 def ferramentas():
@@ -28,6 +28,18 @@ def ferramentas():
         return json.load(open(saida, encoding="utf-8-sig"))
     except (OSError, ValueError):
         return [dict(ok=False, item="Instalador", detalhe="não consegui rodar 1-instalacao/instalar.ps1", essencial=True)]
+
+
+def atualizacao():
+    """Quantas mudanças do kit estão no GitHub e ainda não neste computador (None se não deu para saber, ex.: sem internet)."""
+    env = dict(os.environ, GIT_TERMINAL_PROMPT="0", GCM_INTERACTIVE="never")   # nunca abrir janela de login
+    try:
+        subprocess.run(["git", "-C", KIT, "fetch", "--quiet", "origin"], capture_output=True, timeout=20, env=env, check=True)
+        r = subprocess.run(["git", "-C", KIT, "rev-list", "--count", "HEAD..@{u}"], capture_output=True, text=True,
+                           timeout=10, env=env, check=True)
+        return int(r.stdout.strip())
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None
 
 
 def _uri(p):
@@ -51,8 +63,8 @@ def _item(titulo, estado, detalhe, quem="voce", pedido=None, pasta=None):
 
 def projeto(pasta):
     proj = Projeto(pasta)
-    nome = proj["nome"] or os.path.basename(proj.pasta)
-    pasta_rel = os.path.relpath(proj.pasta, KIT).replace("\\", "/")
+    vid = os.path.basename(proj.pasta)          # nome da pasta: é como o editor chama a VSL nos pedidos
+    nome = proj["nome"] or vid
     itens = {}
 
     fc = proj["filmcraft"]["projeto"]
@@ -61,16 +73,16 @@ def projeto(pasta):
     else:
         itens["filmcraft"] = _item("Projeto do FilmCraft", "falta",
                                    "caminho do .fcproj não encontrado" if fc else "falta o caminho do .fcproj no config.json",
-                                   "claude", f"Configura o projeto do FilmCraft da {nome}")
+                                   "claude", f"Configura o projeto do FilmCraft da {vid}")
 
     seqs = proj["sequencias"]
     lista = ", ".join(f"{k} → {v}" for k, v in seqs.items())
     if not seqs:
         itens["sequencias"] = _item("Sequências", "falta", "nenhuma sequência no config.json", "claude",
-                                    f"Configura as sequências da {nome}")
+                                    f"Configura as sequências da {vid}")
     elif seqs == _exemplo()["sequencias"]:
         itens["sequencias"] = _item("Sequências", "aviso", f"ainda são as do exemplo ({lista}): confira os nomes no FilmCraft",
-                                    "claude", f"Configura as sequências da {nome}")
+                                    "claude", f"Configura as sequências da {vid}")
     else:
         itens["sequencias"] = _item("Sequências", "ok", lista)
 
@@ -98,7 +110,7 @@ def projeto(pasta):
     else:
         itens["transcricao"] = _item("Transcrições", "aviso" if feitas else "falta",
                                      ("feitas: " + ", ".join(feitas) + " · " if feitas else "") + "faltam: " + (", ".join(falta_tr) or "configure as sequências"),
-                                     "claude", f"Abre o FilmCraft e transcreve {falta_tr[0] if falta_tr else 'o corpo'}", _uri(pasta_tr))
+                                     "claude", f"Abre o FilmCraft e transcreve {falta_tr[0] if falta_tr else 'o corpo'} da {vid}", _uri(pasta_tr))
 
     ids, erros, faltam_planos = [], [], []
     for p in proj.plano():
@@ -115,14 +127,14 @@ def projeto(pasta):
     elif erros or faltam_planos:
         itens["plano"] = _item("Plano de cenas", "aviso",
                                f"{len(ids)} cenas · " + "; ".join(erros[:2] + [f"falta {f}" for f in faltam_planos]),
-                               "claude", "Confere meu plano de cenas", _uri(pasta_pl))
+                               "claude", f"Confere o plano de cenas da {vid}", _uri(pasta_pl))
     else:
         itens["plano"] = _item("Plano de cenas", "ok", f"{len(ids)} cenas", pasta=_uri(pasta_pl))
 
     ref = proj["motions"]["referencia"]
     itens["referencia"] = (_item("Quadro de referência", "ok", os.path.basename(ref)) if ref and os.path.exists(proj.caminho(ref)) else
                            _item("Quadro de referência", "aviso", "sem quadro do apresentador: a prévia dos motions sai em fundo cinza",
-                                 "claude", f"Exporta um quadro do apresentador para a referência da {nome}"))
+                                 "claude", f"Exporta um quadro do apresentador para a referência da {vid}"))
 
     pasta_mov = proj.caminho(proj["pastas"]["motions"])
     movs = arquivos_motion(pasta_mov) if os.path.isdir(pasta_mov) else {}
@@ -135,7 +147,7 @@ def projeto(pasta):
         feitos = len(ids) - len(sem)
         itens["motions"] = _item("Motions criados", "aviso" if feitos else "falta",
                                  f"{feitos} de {len(ids)} prontos · faltam {', '.join(sem[:6])}{' …' if len(sem) > 6 else ''}",
-                                 "claude", f"Cria os motions {' e '.join(sem[:2])} para eu ver" if not feitos else "Cria os motions que faltam",
+                                 "claude", f"Cria os motions {' e '.join(sem[:2])} da {vid} para eu ver" if not feitos else f"Cria os motions que faltam da {vid}",
                                  _uri(pasta_mov))
 
     pasta_exp = proj.caminho(proj["pastas"]["exports"])
@@ -149,22 +161,22 @@ def projeto(pasta):
             break
     if proximo is None:
         proximo = _item("Encaixar e entregar", "info", "motions prontos: coloque na timeline, revise e cheque antes de exportar",
-                        "claude", f"Coloca os motions no {next(iter(seqs))} e checa antes de exportar" if seqs else None)
-    return dict(nome=nome, pasta=pasta_rel, uri=_uri(proj.pasta), itens=list(itens.values()), proximo=proximo)
+                        "claude", f"Coloca os motions no {next(iter(seqs))} da {vid} e checa antes de exportar" if seqs else None)
+    return dict(id=vid, nome=nome, pasta=proj.pasta, uri=_uri(proj.pasta), itens=list(itens.values()), proximo=proximo)
 
 
 def gerar(abrir=True):
-    pasta_proj = os.path.join(KIT, "projetos")
     projetos, erros = [], []
-    for n in sorted(os.listdir(pasta_proj)):
-        p = os.path.join(pasta_proj, n)
-        if n.startswith(("_", ".")) or not os.path.isfile(os.path.join(p, "config.json")):
+    for n, p, existe in vsls.todas():
+        if not existe:
+            erros.append(f"{n}: pasta não encontrada ({p}). Se mudou de lugar, peça ao Claude para anotar o novo caminho")
             continue
         try:
             projetos.append(projeto(p))
         except (OSError, ValueError, KeyError) as e:
             erros.append(f"{n}: {e}")
-    dados = dict(gerado=datetime.datetime.now().strftime("%d/%m/%Y %H:%M"), kit=KIT,
+    projetos.sort(key=lambda p: p["nome"].lower())
+    dados = dict(gerado=datetime.datetime.now().strftime("%d/%m/%Y %H:%M"), kit=KIT, atualizacao=atualizacao(),
                  ferramentas=ferramentas(), projetos=projetos, erros=erros)
     modelo = open(os.path.join(KIT, "painel", "modelo.html"), encoding="utf-8").read()
     js = json.dumps(dados, ensure_ascii=False).replace("</", "<\\/")

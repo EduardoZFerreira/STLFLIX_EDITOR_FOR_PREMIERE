@@ -18,7 +18,7 @@ Você conversa com o Claude em português, como num chat. **Ele sempre mostra o 
 - **Claude Code** instalado e com login feito. É o programa onde você conversa com o Claude. Se ainda não tem, peça ajuda a quem te passou este link.
 - **Uma conta no GitHub** (gratuita, em https://github.com) **com o convite aceito** para o repositório do kit. O kit é privado: passe o seu nome de usuário do GitHub para quem te mandou o link, e aceite o convite que chega no seu e-mail.
 - **FilmCraft 0.13 ou mais novo.** Ele é instalado pelo **ArtCraft Launcher**: baixe em https://getartcraft.com.
-- **Google Drive para computador** conectado (aparece como unidade G:), onde ficam os brutos e as entregas.
+- **Google Drive para computador** conectado (normalmente aparece como unidade G:; o kit acha a letra sozinho), onde ficam os brutos e as entregas.
 - Recomendado: computador com **placa de vídeo NVIDIA**. Sem ela tudo funciona, só a transcrição fica mais lenta.
 
 O resto (Git, Node.js, Python, ffmpeg, as ferramentas de transcrição e de motion) o Claude instala para você.
@@ -37,16 +37,17 @@ O resto (Git, Node.js, Python, ffmpeg, as ferramentas de transcrição e de moti
    - talvez pedir para você **fechar e abrir o Claude Code** no meio do caminho, para o Windows enxergar o que acabou de ser instalado.
 
    Na primeira vez leva de 5 a 15 minutos.
-4. No fim, ele abre o **painel do editor** no navegador.
+4. No fim, ele abre o **painel do editor** no navegador e cria o atalho **Painel STLFLIX** na sua área de trabalho.
 
 A partir daí, **sempre abra o Claude Code na pasta `C:\STLFLIX_EDITOR`**. É ali que ele encontra as instruções do kit e as suas VSLs.
 
 ## O painel do editor
 
-É a sua página de apoio. Peça **"Abre o painel"** a qualquer momento. Ele mostra:
+É a sua página de apoio. Abra pelo atalho **Painel STLFLIX** da área de trabalho, ou peça **"Abre o painel"** ao Claude. Se tiver versão nova do kit, ele avisa no topo. Ele mostra:
 
-- se o computador está pronto;
-- o que já está feito em cada VSL e **o próximo passo**, com a frase pronta para copiar e mandar ao Claude;
+- no topo, o **menu da VSL**: escolha em qual VSL vai trabalhar ou **crie uma nova**. O painel lembra a escolha neste computador;
+- se o computador está pronto, e o botão **⬇ ArtCraft** para baixar o ArtCraft Launcher (que instala e atualiza o FilmCraft);
+- o que já está feito na VSL escolhida e **o próximo passo**, com a frase pronta para copiar e mandar ao Claude;
 - o passo a passo completo, o plano de cenas explicado com exemplo, as palavras novas e as dúvidas comuns.
 
 Se ficar perdido, abra o painel.
@@ -101,4 +102,4 @@ Conte ao Claude o que você viu, do seu jeito: "a exportação saiu preta", "o �
 
 ## Atualizar o kit
 
-Peça **"Atualiza o kit"**. O Claude baixa a versão nova e confere a instalação. Suas VSLs (pasta `projetos`) não são afetadas.
+Peça **"Atualiza o kit"**. O Claude baixa a versão nova e confere a instalação. Suas VSLs não são afetadas: elas ficam nas pastas que você escolheu, fora do kit.

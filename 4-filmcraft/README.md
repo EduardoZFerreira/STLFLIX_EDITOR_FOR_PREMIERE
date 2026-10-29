@@ -3,7 +3,7 @@
 `stlflix` é a linha de comando que opera o FilmCraft nas VSLs. Todos os comandos recebem a pasta do projeto, que tem o `config.json`:
 
 ```
-./stlflix.cmd --projeto projetos/<VSL> <comando>        (na raiz do kit)
+./stlflix.cmd --projeto <VSL> <comando>        (na raiz do kit)
 ```
 
 `stlflix.cmd` chama o Python criado pelo instalador em `%LOCALAPPDATA%\STLFLIX_EDITOR\venv`, onde o pacote está instalado em modo editável (`pip install -e 4-filmcraft[gpu]`, ver `pyproject.toml`): mudanças em `stlflix/` valem na hora.
@@ -12,7 +12,7 @@
 
 | Comando | O que faz | Muda o projeto? |
 |---|---|---|
-| `painel` | Página local (`painel/index.html`) com as ferramentas e o que falta em cada VSL; não precisa de `--projeto` | não |
+| `painel` | Página local (`painel/index.html`) com o menu de VSLs, as ferramentas e o que falta na VSL escolhida; não precisa de `--projeto` | não |
 | `nova [--nome X]` | Cria a pasta `--projeto` a partir de `projetos/_MODELO-VSL` (o exemplo do plano vira `EXEMPLO-plano-de-cenas.md`) | não |
 | `abrir` | Abre o FilmCraft com o controle ligado (cria o token na primeira vez) e o `.fcproj` do config | não |
 | `status` | Mostra o que já está preenchido: roteiro, plano de cenas, motions, transcrições, sequências | não |
@@ -24,7 +24,7 @@
 | `enquadrar [seqs]` | Mostra quantos takes estão fora do enquadramento padrão | não |
 | `enquadrar [seqs] --aplicar` | Aplica a escala e a âncora do config nos takes, inclusive dentro de sequências aninhadas | **sim** |
 | `checar [seqs]` | Checagens antes de exportar: quadro preto (mídia do Drive), trilha desligada, áudio de um lado só, áudio dobrado, áudio faltando, mídia offline | não |
-| `reconectar` | Reconecta a mídia do Drive (G:) no mesmo caminho e resolve o "MEDIA UNREADABLE" | sim (só os links) |
+| `reconectar` | Reconecta a mídia do Drive (acha a letra sozinho; `--prefixo H:` para forçar) no mesmo caminho e resolve o "MEDIA UNREADABLE" | sim (só os links) |
 | `exportar-xml [seqs]` | Exporta XML (FCP7) para `drive.entrega_xml`; a versão anterior vai para `_XML anteriores (data)` | não |
 
 `<seq>` é a chave do config (`corpo`, `lead-a`…) ou o nome da sequência no FilmCraft. Sem `seqs`, vale para todas as do config.

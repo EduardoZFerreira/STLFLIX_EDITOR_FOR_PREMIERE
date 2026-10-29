@@ -20,7 +20,7 @@ description: Instala ou confere o ambiente do STLFLIX_EDITOR (Git, Node, Python,
 ## Itens que podem ficar como aviso
 
 - **Placa NVIDIA**: sem ela a transcrição roda no processador, mais devagar.
-- **Google Drive (G:)**: precisa estar conectado para os brutos e entregas no Drive compartilhado. Peça para marcar as pastas da VSL como "disponível off-line" (evita o "MEDIA UNREADABLE").
+- **Google Drive** (G: na maioria das máquinas; o kit acha a letra sozinho): precisa estar conectado para os brutos e entregas no Drive compartilhado. Peça para marcar as pastas da VSL como "disponível off-line" (evita o "MEDIA UNREADABLE").
 
 ## Ao terminar
 

@@ -2,6 +2,8 @@
 
 Contexto para continuar o trabalho em outra conversa. Projetos: **VSL-Hugo** (VSL Black November 2026, STLFLIX) e **VSL-Shark** (VSL 682 [BLACK26], apresentado pelo Lincoln). Editor: FilmCraft 0.9.0 no Windows, controlado ao vivo por um agente via canal de controle. O usuário revisa tudo na timeline e salva com Ctrl+S.
 
+> **Leia como aprendizado, não como configuração.** Os caminhos com `C:\Users\joaop\...`, os valores de enquadramento e o estado das seções 8 e 9 são do computador e das VSLs onde isso foi aprendido. Em outra VSL ou outro computador, os caminhos vêm do `config.json` da VSL e o token de `~/.config/filmcraft/control_token` (o `stlflix abrir` já cuida disso).
+
 ---
 
 ## 1. Como se conectar ao FilmCraft
@@ -187,6 +189,8 @@ class FC:
 
 ## 8. Caminhos
 
+Histórico das VSLs do Hugo e do Shark, no computador onde foram editadas. Não use em outra VSL.
+
 | O quê | Caminho |
 |---|---|
 | Projetos FilmCraft | `C:\Users\joaop\OneDrive\Desktop\Filmcraft\VSL-Hugo.fcproj`, `…\VSL-Shark.fcproj` |
@@ -204,6 +208,8 @@ class FC:
 ---
 
 ## 9. Estado no fim desta conversa (22/10/2026)
+
+Histórico: como as VSLs do Hugo e do Shark estavam nessa data.
 
 **VSL-Shark:**
 - Leads A–G com takes em 114%/âncora Y 1900 e motions A1–G8 na V2 (escala 200).

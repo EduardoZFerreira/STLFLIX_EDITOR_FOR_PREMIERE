@@ -1,6 +1,6 @@
 # Como escrever o plano de cenas
 
-O plano de cenas (`projetos/<VSL>/04-plano-de-cenas/plano-de-cenas.md`) é **um arquivo só para duas coisas**:
+O plano de cenas (`<pasta da VSL>/04-plano-de-cenas/plano-de-cenas.md`) é **um arquivo só para duas coisas**:
 
 1. **Encaixar** cada motion na timeline, pela frase-gatilho.
 2. **Gerar** o motion (o .mov transparente), pela descrição embaixo da cena.
@@ -64,6 +64,6 @@ A `conta` descobre sozinha prefixo e sufixo: `R$ 5 mil` conta de R$ 0 mil a R$ 5
 ## Conferir
 
 ```
-node 3-motions/motions.mjs validar --projeto projetos/<VSL>
-node 3-motions/motions.mjs render  --projeto projetos/<VSL> --so B05H,B05I     ← só algumas cenas, para testar
+node 3-motions/motions.mjs validar --projeto <VSL>
+node 3-motions/motions.mjs render  --projeto <VSL> --so B05H,B05I     ← só algumas cenas, para testar
 ```

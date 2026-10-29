@@ -3,10 +3,10 @@
 Transforma o `plano-de-cenas.md` do projeto em motions .mov transparentes (ProRes 4444, 1080×1920, 30 fps), já posicionados na faixa acima da cabeça do apresentador.
 
 ```
-node 3-motions/motions.mjs validar --projeto projetos/<VSL> [--plano corpo]
-node 3-motions/motions.mjs gerar   --projeto projetos/<VSL> [--plano corpo]     cria/atualiza a pasta de trabalho
-node 3-motions/motions.mjs previa  --projeto projetos/<VSL> [--plano corpo]     abre o Studio do HyperFrames
-node 3-motions/motions.mjs render  --projeto projetos/<VSL> [--plano corpo] [--so B05H,B05I] [--por-parte 30]
+node 3-motions/motions.mjs validar --projeto <VSL> [--plano corpo]
+node 3-motions/motions.mjs gerar   --projeto <VSL> [--plano corpo]     cria/atualiza a pasta de trabalho
+node 3-motions/motions.mjs previa  --projeto <VSL> [--plano corpo]     abre o Studio do HyperFrames
+node 3-motions/motions.mjs render  --projeto <VSL> [--plano corpo] [--so B05H,B05I] [--por-parte 30]
 node 3-motions/motions.mjs migrar  --build <build.mjs antigo> --gatilhos <plano com frases> --saida <plano.md>
 ```
 

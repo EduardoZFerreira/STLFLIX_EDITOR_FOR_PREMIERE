@@ -10,6 +10,7 @@ import os
 import subprocess
 import tempfile
 
+from .midia import letra_drive
 from .tempo import T, mmss
 
 
@@ -36,6 +37,7 @@ def checar(fc, nomes_seq, testar_render=True):
     seqs = fc.sequencias()
     status = {m["item"]: m for m in fc.run("media.status")}
     achados = []
+    drive = (letra_drive() or "G:").upper()
     for nome in nomes_seq:
         if nome not in seqs:
             achados.append(("ERRO", nome, "sequência não existe no projeto"))
@@ -69,7 +71,7 @@ def checar(fc, nomes_seq, testar_render=True):
             amostra = {}
             for c in s["video"][0]["items"]:              # 1 quadro por arquivo do Drive
                 p = (status.get(c["item"]) or {}).get("path") or ""
-                if p.upper().startswith("G:") and p not in amostra:
+                if p.upper().startswith(drive) and p not in amostra:
                     amostra[p] = c
             for p, c in list(amostra.items())[:6]:
                 meio = (c["start"] + c["end"]) // 2

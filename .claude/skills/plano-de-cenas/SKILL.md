@@ -29,9 +29,9 @@ O plano é **do editor**: ele escreve a partir da transcrição (`06-transcricoe
 ## Conferir
 
 ```
-./stlflix.cmd --projeto projetos/<VSL> plano                       formato, ids e .mov que faltam
-node 3-motions/motions.mjs validar --projeto projetos/<VSL>         linguagem das peças
-./stlflix.cmd --projeto projetos/<VSL> motions <seq>                se cada frase-gatilho é encontrada na sequência
+./stlflix.cmd --projeto <VSL> plano                       formato, ids e .mov que faltam
+node 3-motions/motions.mjs validar --projeto <VSL>         linguagem das peças
+./stlflix.cmd --projeto <VSL> motions <seq>                se cada frase-gatilho é encontrada na sequência
 ```
 
 O último mostra a nota de cada frase (≥ 0,75 encaixa). Frase não encontrada: copie de novo da transcrição, com as palavras como foram ditas.

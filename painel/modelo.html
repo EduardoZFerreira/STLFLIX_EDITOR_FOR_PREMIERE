@@ -26,11 +26,12 @@
   --info: #6b6e80;
   --radius: 14px;
   --grad: linear-gradient(90deg, #22d3ee 0%, #4f63e8 50%, #b14cf0 100%);
+  --margem: clamp(16px, 4vw, 64px);
 }
 * { box-sizing: border-box; }
 html { background: var(--bg); scroll-behavior: smooth; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 "Inter", system-ui, sans-serif; }
-main { max-width: 1040px; margin: 0 auto; padding: 0 16px 80px; }
+main { max-width: 1680px; margin: 0 auto; padding: 0 var(--margem) 80px; }
 h1, h2, h3 { font-family: "Sora", "Inter", sans-serif; font-weight: 700; margin: 0; letter-spacing: -.01em; line-height: 1.25; }
 h2 { font-size: 26px; }
 h3 { font-size: 17px; }
@@ -43,12 +44,21 @@ section.bloco > .intro { color: var(--text-dim); max-width: 680px; margin: 8px 0
 
 /* topo */
 .topo { position: sticky; top: 0; z-index: 5; background: rgba(13,14,20,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-.topo-in { max-width: 1040px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; gap: 16px; }
+.topo-in { max-width: 1680px; margin: 0 auto; padding: 12px var(--margem); display: flex; align-items: center; gap: 16px; }
 .topo img { height: 24px; }
-.topo b { font-family: "Sora", sans-serif; }
-.topo nav { margin-left: auto; display: flex; gap: 18px; font-size: 14px; overflow-x: auto; }
+.topo b { font-family: "Sora", sans-serif; white-space: nowrap; }
+.topo nav { margin-left: auto; display: flex; gap: 18px; font-size: 14px; overflow-x: auto; min-width: 0; scrollbar-width: none; }
+.topo nav::-webkit-scrollbar { display: none; }
 .topo nav a { color: var(--text-dim); text-decoration: none; white-space: nowrap; }
 .topo nav a:hover { color: var(--text); }
+.escolha { flex: none; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); min-width: 0; }
+.escolha select { background: var(--surface-2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px;
+  font: 600 14px "Inter", sans-serif; max-width: 230px; min-width: 0; cursor: pointer; }
+.btn { display: inline-flex; align-items: center; gap: 6px; background: var(--surface-2); color: var(--text); border: 1px solid var(--line); border-radius: 9px;
+  padding: 7px 12px; font: 600 13.5px "Inter", sans-serif; text-decoration: none; cursor: pointer; white-space: nowrap; }
+.btn:hover { border-color: var(--accent); }
+.btn.cta { background: var(--cta); color: #10140a; border-color: transparent; }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--accent-text); text-decoration: underline; cursor: pointer; font: inherit; }
 
 /* boas-vindas */
 .hero { padding: 56px 0 8px; }
@@ -76,6 +86,17 @@ section.bloco > .intro { color: var(--text-dim); max-width: 680px; margin: 8px 0
 .rotulo { font: 600 11.5px "Inter", sans-serif; letter-spacing: .09em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
 .destaque .rotulo { color: var(--cta); }
 .cartao h3 { margin-bottom: 8px; }
+.lista-vsl { display: grid; gap: 8px; margin: 14px 0 0; }
+.opcao-vsl { text-align: left; width: 100%; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
+  color: var(--text); font: 15px/1.45 "Inter", sans-serif; cursor: pointer; }
+.opcao-vsl:hover { border-color: var(--accent); }
+.opcao-vsl b { display: block; font-weight: 600; }
+.opcao-vsl small { color: var(--text-dim); font-size: 13px; }
+.opcao-vsl.nova { border-style: dashed; }
+.opcao-vsl.nova b { color: var(--cta); }
+.campo { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--text);
+  font: 16px "Inter", sans-serif; margin: 2px 0 12px; }
+.campo:focus { outline: 2px solid var(--accent); border-color: transparent; }
 .cartao ol, .cartao ul { margin: 8px 0 14px; padding-left: 20px; }
 .cartao li { margin: 4px 0; }
 .estado-pc { display: flex; gap: 10px; align-items: flex-start; }
@@ -185,10 +206,18 @@ details.ferr-det summary { cursor: pointer; color: var(--accent-text); font-size
 .legenda-estados { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--text-dim); margin-top: 10px; }
 .legenda-estados span { display: inline-flex; gap: 6px; align-items: center; }
 .legenda-estados .dot { margin: 0; }
+#aviso-kit { margin-top: 20px; background: var(--surface-2); border-left: 3px solid var(--cta); border-radius: 10px; padding: 14px 16px;
+  display: flex; gap: 6px 16px; align-items: center; flex-wrap: wrap; }
+#aviso-kit[hidden] { display: none; }
+.vsl-pasta { color: var(--text-dim); font: 12.5px ui-monospace, Consolas, monospace; overflow-wrap: anywhere; margin: -2px 0 10px; }
 .alerta { margin-top: 14px; background: rgba(255,92,92,.08); border: 1px solid rgba(255,92,92,.3); border-radius: var(--radius); padding: 14px 16px; }
 
 footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--text-dim); font-size: 13.5px; }
 
+@media (max-width: 1400px) {
+  .topo nav { display: none; }
+  .topo .btn { margin-left: auto; }
+}
 @media (max-width: 860px) {
   .promessas, .comecar, .conversa-grade, .plano-grade, .passo .colunas { grid-template-columns: 1fr; }
   .trilha { grid-template-columns: repeat(4, 1fr); }
@@ -197,7 +226,10 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
   .resultado { max-width: 360px; }
 }
 @media (max-width: 560px) {
-  .topo nav { display: none; }
+  .topo nav, .topo-in > b, .escolha > span { display: none; }
+  .topo-in { gap: 10px; }
+  .escolha { flex: 1; }
+  .escolha select { max-width: none; width: 100%; }
   .trilha { grid-template-columns: repeat(2, 1fr); }
   .passo { grid-template-columns: 1fr; }
   .passo .num { margin-bottom: 6px; }
@@ -208,13 +240,16 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
 <body>
 <div class="topo"><div class="topo-in">
   <img src="../2-design-system/STLFLIX/stlflix.svg" alt="STLFLIX"><b>Painel do editor</b>
+  <label class="escolha"><span>VSL</span><select id="escolha" aria-label="Escolher a VSL"></select></label>
   <nav>
     <a href="#comecar">Começar</a><a href="#conversar">Conversar com o Claude</a><a href="#caminho">Passo a passo</a>
     <a href="#plano">Plano de cenas</a><a href="#pasta">A pasta</a><a href="#palavras">Palavras</a><a href="#duvidas">Dúvidas</a>
   </nav>
+  <a class="btn" href="https://getartcraft.com" target="_blank" rel="noopener" title="Baixar o ArtCraft Launcher, que instala e atualiza o FilmCraft">⬇ ArtCraft</a>
 </div></div>
 
 <main>
+  <div id="aviso-kit" hidden></div>
   <section class="hero" id="comecar">
     <h1>Edite a VSL. <em>O Claude cuida do repetitivo.</em></h1>
     <p class="lead">Este kit junta você, o <b>FilmCraft</b> e um assistente, o <b>Claude</b>. Você continua editando como sempre. O Claude escreve tudo o que foi falado no vídeo, cria os letterings animados da STLFLIX (os <b>motions</b>) a partir do que você planejar e coloca cada um no segundo certo da timeline.</p>
@@ -225,14 +260,15 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
     </div>
 
     <div class="comecar">
+      <div class="cartao destaque" id="cartao-vsl"></div>
       <div class="cartao" id="cartao-pc"></div>
-      <div class="cartao destaque" id="cartao-proximo"></div>
     </div>
+    <div id="erros"></div>
   </section>
 
   <section class="bloco" id="suas-vsls" hidden>
-    <h2>Suas VSLs</h2>
-    <p class="intro">O que já está pronto em cada VSL e o que fazer agora. Para atualizar esta página, peça ao Claude: “Abre o painel”.</p>
+    <h2>Andamento da VSL</h2>
+    <p class="intro">O que já está pronto na VSL escolhida e o que fazer agora. Para trocar de VSL, use o menu no topo. Para atualizar esta página, peça ao Claude: “Abre o painel”.</p>
     <div id="projetos"></div>
     <div class="legenda-estados">
       <span><i class="dot" style="background:var(--ok)"></i>pronto</span>
@@ -254,7 +290,7 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
         <div class="msg claude"><span class="quem">Claude</span>Pronto: 43 motions na trilha V2. Dá uma olhada na timeline e salve com <b>Ctrl+S</b>.</div>
       </div>
       <div class="dicas">
-        <div class="dica"><div class="ico">📂</div><div><b>Abra sempre na pasta do kit</b><span>Ao abrir o Claude Code, escolha a pasta <code>C:\STLFLIX_EDITOR</code>. É ali que ele encontra as instruções e as suas VSLs.</span></div></div>
+        <div class="dica"><div class="ico">📂</div><div><b>Abra sempre na pasta do kit</b><span>Ao abrir o Claude Code, escolha a pasta do kit, <code class="kit-pasta">C:\STLFLIX_EDITOR</code>. É ali que ele encontra as instruções e a lista das suas VSLs.</span></div></div>
         <div class="dica"><div class="ico">💬</div><div><b>Fale normal</b><span>“Transcreve o lead B”, “o motion do bloco 5 entrou atrasado”, “o áudio está estranho”. Se ele não entender, ele pergunta.</span></div></div>
         <div class="dica"><div class="ico">✅</div><div><b>Ele pede antes de mexer</b><span>Para mudar a timeline, ele mostra o plano e espera você responder “pode colocar”. Se não gostar, diga o que mudar.</span></div></div>
         <div class="dica"><div class="ico">🔐</div><div><b>Pedidos de permissão</b><span>O Claude Code pergunta antes de usar o computador (abrir programa, rodar ferramenta). Na dúvida, pergunte a ele o que aquilo faz antes de permitir.</span></div></div>
@@ -378,7 +414,7 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
 
   <section class="bloco" id="pasta">
     <h2>A pasta da VSL</h2>
-    <p class="intro">Cada VSL tem uma pasta dentro de <code>C:\STLFLIX_EDITOR\projetos\</code>. Algumas partes você preenche; outras o kit cria sozinho.</p>
+    <p class="intro">Cada VSL tem a sua pasta, onde você quiser no computador (por exemplo, junto do projeto do FilmCraft). Tudo o que o kit gera para ela fica lá dentro. Algumas partes você preenche; outras o kit cria sozinho.</p>
     <div class="pasta">
       <div class="pasta-linha"><span class="nome">01-roteiro</span><span class="tag voce">você coloca</span><span>O roteiro do teleprompter (<code>teleprompter.txt</code>), com os blocos marcados assim: <code>--- BLOCO 5 · Título ---</code></span></div>
       <div class="pasta-linha"><span class="nome">02-brutos</span><span class="tag voce">você coloca</span><span>Os vídeos da câmera. Se já estão no Drive, não precisa copiar: um atalho basta.</span></div>
@@ -396,7 +432,7 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
     <p class="intro">O kit usa alguns termos que talvez sejam novos.</p>
     <div class="glossario">
       <div class="termo"><b>Claude Code</b><span>O programa onde você conversa com o Claude. Ele consegue usar o seu computador para fazer as tarefas.</span></div>
-      <div class="termo"><b>Kit</b><span>Esta pasta, <code>C:\STLFLIX_EDITOR</code>: instruções, ferramentas e o visual da STLFLIX que o Claude usa.</span></div>
+      <div class="termo"><b>Kit</b><span>A pasta <code class="kit-pasta">C:\STLFLIX_EDITOR</code>: instruções, ferramentas e o visual da STLFLIX que o Claude usa. As suas VSLs ficam fora dela.</span></div>
       <div class="termo"><b>Sequência</b><span>Uma timeline dentro do projeto do FilmCraft, como “Corpo decupado” ou “Lead A”.</span></div>
       <div class="termo"><b>Transcrição</b><span>O texto de tudo o que foi falado na sequência, com o tempo de cada frase.</span></div>
       <div class="termo"><b>Motion</b><span>Lettering animado com o visual da STLFLIX (títulos, números, ícones) que aparece sobre o apresentador.</span></div>
@@ -406,7 +442,7 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
       <div class="termo"><b>Trilha V2</b><span>A segunda trilha de vídeo da timeline, acima dos takes. É onde os motions entram.</span></div>
       <div class="termo"><b>XML</b><span>Um arquivo que guarda a montagem de uma sequência, para abrir em outro computador ou programa.</span></div>
       <div class="termo"><b>Drive (G:)</b><span>O Google Drive compartilhado da empresa, onde ficam os brutos e as entregas.</span></div>
-      <div class="termo"><b>ArtCraft Launcher</b><span>O programa que instala e atualiza o FilmCraft.</span></div>
+      <div class="termo"><b>ArtCraft Launcher</b><span>O programa que instala e atualiza o FilmCraft. Baixe em <a href="https://getartcraft.com" target="_blank" rel="noopener">getartcraft.com</a> (ou no botão ⬇ ArtCraft, no topo).</span></div>
     </div>
   </section>
 
@@ -419,7 +455,7 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
     <details><summary>O motion entrou no lugar errado. E agora?</summary><p>Quase sempre é porque a frase-gatilho aparece duas vezes no vídeo, ou foi copiada do roteiro em vez da transcrição. Ajuste a frase no plano e peça para colocar de novo. Você também pode só arrastar o motion na timeline.</p></details>
     <details><summary>Quero mudar o texto de um motion.</summary><p>Mude no plano de cenas e peça: “refaz o motion B05H”. Ele cria só aquele de novo.</p></details>
     <details><summary>Algo deu errado e não sei o que é.</summary><p>Conte ao Claude o que você viu, do seu jeito: “a exportação saiu preta”, “o áudio está só de um lado”, “os motions não aparecem”. Os problemas que já aconteceram no time estão documentados no kit, e ele sabe resolver.</p></details>
-    <details><summary>Onde ficam os meus arquivos?</summary><p>Cada VSL fica em <code>C:\STLFLIX_EDITOR\projetos\</code>. Os vídeos pesados (brutos e B-rolls) podem continuar no Drive. Atualizar o kit (“atualiza o kit”) não mexe nas suas VSLs.</p></details>
+    <details><summary>Onde ficam os meus arquivos?</summary><p>Cada VSL fica na pasta que você escolheu ao criar (o painel mostra o caminho de cada uma). Motions, transcrições e exportações vão para dentro dela. Prefira um disco do computador, não o Drive: os renders ficam mais rápidos. Os vídeos pesados (brutos e B-rolls) podem continuar no Drive. Atualizar o kit (“atualiza o kit”) não mexe nas suas VSLs. Recebeu a pasta de uma VSL de outro editor? Peça: “Anota a VSL que está nesta pasta” e diga o caminho.</p></details>
   </section>
 
   <footer>Painel gerado em <span id="gerado"></span>. Para atualizar, peça ao Claude: “Abre o painel”.</footer>
@@ -433,60 +469,136 @@ footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
   var pedido = function (t) { return t ? '<div class="pedido"><span>' + esc(t) + '</span><button>copiar</button></div>' : ""; };
 
   document.getElementById("gerado").textContent = D.gerado;
+  [].forEach.call(document.querySelectorAll(".kit-pasta"), function (e) { e.textContent = D.kit; });
+
+  // kit desatualizado?
+  if (D.atualizacao > 0) {
+    var av = document.getElementById("aviso-kit");
+    av.hidden = false;
+    av.innerHTML = "<div><b>Tem uma versão nova do kit</b> " +
+      '<span class="dim">(' + D.atualizacao + (D.atualizacao === 1 ? " mudança" : " mudanças") + "). Suas VSLs não são afetadas.</span></div>" +
+      pedido("Atualiza o kit");
+  }
 
   // computador pronto?
-  var LINK = { "FilmCraft": "https://getartcraft.com" };
+  var ARTCRAFT = "https://getartcraft.com";
+  var botaoArtcraft = function (cta) {
+    return '<a class="btn' + (cta ? " cta" : "") + '" href="' + ARTCRAFT + '" target="_blank" rel="noopener">⬇ Baixar o ArtCraft Launcher</a>';
+  };
   var faltam = D.ferramentas.filter(function (f) { return !f.ok && f.essencial; });
   var grade = '<div class="ferramentas">' + D.ferramentas.map(function (f) {
     var estado = f.ok ? "ok" : (f.essencial ? "falta" : "aviso");
-    var det = esc(f.detalhe) + (!f.ok && LINK[f.item] ? ' · <a href="' + LINK[f.item] + '">baixar o ArtCraft Launcher</a>' : "");
+    var det = esc(f.detalhe) + (!f.ok && f.item === "FilmCraft" ? ' · <a href="' + ARTCRAFT + '" target="_blank" rel="noopener">baixar o ArtCraft Launcher</a>' : "");
     return '<div class="ferr ' + estado + '"><span class="dot"></span><div><b>' + esc(f.item) + "</b><small>" + det + "</small></div></div>";
   }).join("") + "</div>";
   var pc = document.getElementById("cartao-pc");
   if (!faltam.length) {
     pc.innerHTML = '<div class="rotulo">Seu computador</div><div class="estado-pc"><span class="grande">✅</span><div><h3>Está tudo instalado</h3>' +
       '<p class="dim" style="margin:0">FilmCraft, ferramentas de vídeo e o que o Claude precisa para trabalhar.</p></div></div>' +
+      '<p class="dim" style="margin:14px 0 8px;font-size:14px">O FilmCraft é instalado e atualizado pelo ArtCraft Launcher:</p>' + botaoArtcraft(false) +
       '<details class="ferr-det"><summary>ver detalhes</summary>' + grade + "</details>";
   } else {
     pc.style.borderColor = "rgba(255,92,92,.4)";
     var temFC = faltam.some(function (f) { return f.item === "FilmCraft"; });
     pc.innerHTML = '<div class="rotulo" style="color:var(--falta)">Seu computador</div><h3>Falta instalar: ' + esc(faltam.map(function (f) { return f.item; }).join(", ")) + "</h3>" +
-      (temFC ? '<p class="dim">O FilmCraft você instala pelo <a href="https://getartcraft.com">ArtCraft Launcher</a>. </p>' : "") +
-      '<p class="dim">O resto o Claude instala. Peça:</p>' + pedido("Instala o kit") + grade;
+      (temFC ? '<p class="dim">O FilmCraft você instala pelo ArtCraft Launcher. Baixe, instale e abra o FilmCraft por ele:</p><p>' + botaoArtcraft(true) + "</p>" : "") +
+      '<p class="dim">O resto o Claude instala. Peça:</p>' + pedido("Instala o kit") + grade +
+      (temFC ? "" : '<p style="margin:14px 0 0">' + botaoArtcraft(false) + "</p>");
   }
 
-  // próximo passo
-  var prox = document.getElementById("cartao-proximo");
-  if (!D.projetos.length) {
-    prox.innerHTML = '<div class="rotulo">Seu primeiro passo</div><h3>Criar a sua primeira VSL</h3>' +
-      "<p>Tenha em mãos:</p><ul><li>o roteiro do teleprompter (.txt)</li><li>o projeto da VSL salvo no FilmCraft</li></ul>" +
-      "<p>Abra o Claude Code na pasta <code>C:\\STLFLIX_EDITOR</code> e escreva:</p>" + pedido("Cria uma VSL nova chamada VSL-Nome") +
-      '<p class="dim" style="margin:12px 0 0;font-size:14px">Troque “VSL-Nome” pelo nome da sua VSL, por exemplo VSL-Shark. Ele vai te fazer algumas perguntas.</p>';
-  } else {
-    var p0 = D.projetos[0];
-    prox.innerHTML = '<div class="rotulo">Próximo passo · ' + esc(p0.nome) + "</div><h3>" + esc(p0.proximo.titulo) + "</h3><p>" + esc(p0.proximo.detalhe) + "</p>" +
-      (p0.proximo.pedido ? "<p>Peça ao Claude:</p>" + pedido(p0.proximo.pedido) : '<p class="dim">Essa parte é com você.</p>') +
-      (D.projetos.length > 1 ? '<p class="dim" style="margin:12px 0 0;font-size:14px">Veja as outras VSLs em <a href="#suas-vsls">Suas VSLs</a>.</p>' : "");
+  if (D.erros && D.erros.length) {
+    document.getElementById("erros").innerHTML = '<div class="alerta">Não consegui ler: ' + esc(D.erros.join(" · ")) + "</div>";
   }
 
-  // suas VSLs
-  if (D.projetos.length) {
-    document.getElementById("suas-vsls").hidden = false;
-    document.getElementById("projetos").innerHTML = D.projetos.map(function (p) {
-      var conta = p.itens.filter(function (i) { return i.estado !== "info"; });
-      var feitos = conta.filter(function (i) { return i.estado === "ok"; }).length;
-      var px = p.proximo;
-      return '<div class="vsl"><div class="vsl-topo"><h3>' + esc(p.nome) + "</h3>" +
-        (p.uri ? '<a href="' + esc(p.uri) + '">abrir a pasta</a>' : "") +
-        '<span class="dim" style="font-size:14px">' + feitos + " de " + conta.length + " prontos</span></div>" +
-        '<div class="barra"><i style="width:' + Math.round(100 * feitos / Math.max(conta.length, 1)) + '%"></i></div>' +
-        '<div class="proximo"><div class="rotulo">Agora</div><p><b>' + esc(px.titulo) + "</b>: " + esc(px.detalhe) + "</p>" + pedido(px.pedido) + "</div>" +
-        '<div class="itens">' + p.itens.map(function (i) {
-          return '<div class="item ' + esc(i.estado) + '"><span class="dot"></span><div><b>' + esc(i.titulo) + "</b><small>" + esc(i.detalhe) + "</small>" +
-            (i.pasta ? '<a href="' + esc(i.pasta) + '">abrir pasta</a>' : "") + "</div></div>";
-        }).join("") + "</div></div>";
-    }).join("") + (D.erros && D.erros.length ? '<div class="alerta">Não consegui ler: ' + esc(D.erros.join(" · ")) + "</div>" : "");
+  // escolher a VSL: nada vem escolhido sozinho; a escolha fica guardada só neste navegador
+  var CHAVE = "stlflix-vsl";
+  var lembrada = function () { try { return localStorage.getItem(CHAVE); } catch (err) { return null; } };
+  var guardar = function (id) { try { if (id) localStorage.setItem(CHAVE, id); else localStorage.removeItem(CHAVE); } catch (err) {} };
+  var porId = function (id) { return D.projetos.filter(function (p) { return p.id === id; })[0] || null; };
+  var contagem = function (p) {
+    var conta = p.itens.filter(function (i) { return i.estado !== "info"; });
+    return { feitos: conta.filter(function (i) { return i.estado === "ok"; }).length, total: conta.length };
+  };
+  var barra = function (c) { return '<div class="barra"><i style="width:' + Math.round(100 * c.feitos / Math.max(c.total, 1)) + '%"></i></div>'; };
+  var nomeVsl = function (t) { return t.trim().replace(/\s+/g, "-").replace(/[^\wÀ-ſ-]/g, ""); };
+
+  var atual = porId(lembrada());
+  var modo = atual ? "vsl" : "escolher";
+  var menu = document.getElementById("escolha");
+  var cartao = document.getElementById("cartao-vsl");
+  menu.innerHTML = '<option value="">Escolha a VSL…</option>' + D.projetos.map(function (p) {
+    return '<option value="' + esc(p.id) + '">' + esc(p.nome) + "</option>";
+  }).join("") + '<option value="__nova">＋ Criar VSL nova</option>';
+
+  function escolher(id) { atual = porId(id); guardar(atual && atual.id); modo = atual ? "vsl" : "escolher"; desenhar(); }
+
+  function desenhar() {
+    if (modo === "escolher" && !D.projetos.length) modo = "nova";
+    menu.value = modo === "nova" ? "__nova" : (modo === "vsl" ? atual.id : "");
+
+    if (modo === "nova") {
+      cartao.innerHTML = '<div class="rotulo">VSL nova</div><h3>Criar uma VSL nova</h3>' +
+        '<p class="dim">Cada VSL ganha uma pasta própria, no lugar do computador que você escolher. Dê um nome curto, sem espaços:</p>' +
+        '<input class="campo" id="nome-nova" placeholder="VSL-Nome" autocomplete="off" spellcheck="false">' +
+        '<p id="aviso-nome" style="color:var(--aviso);font-size:14px" hidden>Já existe uma VSL com esse nome. Escolha outro, ou abra a que já existe no menu.</p>' +
+        "<p>Tenha em mãos o roteiro do teleprompter (.txt) e o projeto da VSL salvo no FilmCraft. Abra o Claude Code na pasta do kit e mande:</p>" +
+        '<div class="pedido"><span id="pedido-nova">Cria uma VSL nova chamada VSL-Nome</span><button>copiar</button></div>' +
+        '<p class="dim" style="margin:12px 0 0;font-size:14px">Ele pergunta onde salvar a pasta (abre a janela do Windows para você escolher; pode ser junto do projeto do FilmCraft) e mais algumas coisas. Depois, peça “Abre o painel” e ela aparece no menu.</p>' +
+        (D.projetos.length ? '<p style="margin:10px 0 0;font-size:14px"><button class="linkbtn" data-ir="escolher">voltar para as VSLs</button></p>' : "");
+      var campo = document.getElementById("nome-nova");
+      campo.addEventListener("input", function () {
+        var n = nomeVsl(campo.value);
+        document.getElementById("pedido-nova").textContent = "Cria uma VSL nova chamada " + (n || "VSL-Nome");
+        document.getElementById("aviso-nome").hidden = !porId(n);
+      });
+    } else if (modo === "escolher") {
+      cartao.innerHTML = '<div class="rotulo">Sua VSL</div><h3>Em qual VSL você vai trabalhar?</h3>' +
+        '<div class="lista-vsl">' + D.projetos.map(function (p) {
+          var c = contagem(p);
+          return '<button class="opcao-vsl" data-vsl="' + esc(p.id) + '"><b>' + esc(p.nome) + "</b><small>" +
+            c.feitos + " de " + c.total + " prontos · agora: " + esc(p.proximo.titulo) + "</small></button>";
+        }).join("") +
+        '<button class="opcao-vsl nova" data-ir="nova"><b>＋ Criar uma VSL nova</b><small>para um roteiro que ainda não está no kit</small></button></div>';
+    } else {
+      var px = atual.proximo;
+      cartao.innerHTML = '<div class="rotulo">Trabalhando em</div><h3>' + esc(atual.nome) + "</h3>" +
+        '<div class="vsl-pasta">' + esc(atual.pasta) + "</div>" + barra(contagem(atual)) +
+        '<p style="margin-bottom:6px">Ao abrir o Claude Code, avise em qual VSL vai trabalhar:</p>' + pedido("Vamos trabalhar na " + atual.id) +
+        '<div class="proximo" style="margin:16px 0 12px"><div class="rotulo">Próximo passo</div><p><b>' + esc(px.titulo) + "</b>: " + esc(px.detalhe) + "</p>" +
+        (px.pedido ? pedido(px.pedido) : '<p class="dim" style="margin:0">Essa parte é com você.</p>') + "</div>" +
+        '<p style="margin:0;font-size:14px"><a href="#suas-vsls">ver tudo desta VSL</a> · <button class="linkbtn" data-ir="escolher">trocar de VSL</button></p>';
+    }
+    desenharAndamento();
   }
+
+  function desenharAndamento() {
+    var sec = document.getElementById("suas-vsls");
+    sec.hidden = modo !== "vsl";
+    if (sec.hidden) return;
+    var p = atual, c = contagem(p), px = p.proximo;
+    document.getElementById("projetos").innerHTML = '<div class="vsl"><div class="vsl-topo"><h3>' + esc(p.nome) + "</h3>" +
+      (p.uri ? '<a href="' + esc(p.uri) + '">abrir a pasta</a>' : "") +
+      '<span class="dim" style="font-size:14px">' + c.feitos + " de " + c.total + " prontos</span></div>" +
+      '<div class="vsl-pasta" style="margin-top:4px">' + esc(p.pasta) + "</div>" + barra(c) +
+      '<div class="proximo"><div class="rotulo">Agora</div><p><b>' + esc(px.titulo) + "</b>: " + esc(px.detalhe) + "</p>" + pedido(px.pedido) + "</div>" +
+      '<div class="itens">' + p.itens.map(function (i) {
+        return '<div class="item ' + esc(i.estado) + '"><span class="dot"></span><div><b>' + esc(i.titulo) + "</b><small>" + esc(i.detalhe) + "</small>" +
+          (i.pasta ? '<a href="' + esc(i.pasta) + '">abrir pasta</a>' : "") + "</div></div>";
+      }).join("") + "</div></div>";
+  }
+
+  menu.addEventListener("change", function () {
+    if (menu.value === "__nova") { modo = "nova"; desenhar(); }
+    else escolher(menu.value);
+  });
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-vsl], [data-ir]");
+    if (!b) return;
+    if (b.dataset.vsl) escolher(b.dataset.vsl);
+    else if (b.dataset.ir === "escolher") escolher(null);
+    else { modo = b.dataset.ir; desenhar(); }
+  });
+  desenhar();
 
   // copiar pedidos
   document.addEventListener("click", function (e) {

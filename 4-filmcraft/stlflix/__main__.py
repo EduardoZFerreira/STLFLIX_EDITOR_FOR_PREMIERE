@@ -1,5 +1,6 @@
-"""python -m stlflix --projeto projetos/<VSL> <comando>
+"""python -m stlflix --projeto <VSL> <comando>
 
+--projeto aceita o caminho da pasta da VSL (em qualquer lugar do computador) ou só o nome dela, se já foi anotada (ver vsls.py).
 Comandos que só leem: status, plano, checar, motions (sem --aplicar), enquadrar (sem --aplicar).
 Comandos que mudam o projeto no FilmCraft pedem --aplicar (ou são a própria ação: reconectar, exportar-xml).
 """
@@ -8,7 +9,7 @@ import json
 import os
 import sys
 
-from . import blocos, checar, enquadrar, exportar, midia, motions, plano
+from . import blocos, checar, enquadrar, exportar, midia, motions, plano, vsls
 from .audio import exportar_mix, mapa_de_cortes, trechos_mudos
 from .fc import FC, FilmCraftError, abrir, porta_aberta
 from .projeto import Projeto
@@ -20,26 +21,46 @@ def _seqs(proj, nomes):
 
 
 def cmd_nova(a):
-    """Copia projetos/_MODELO-VSL para a pasta pedida e põe o nome no config.json."""
+    """Copia projetos/_MODELO-VSL para a pasta pedida (em qualquer lugar), põe nome e campanha no config.json e anota a VSL."""
     import shutil
     destino = os.path.abspath(a.projeto)
-    modelo = os.path.join(os.path.dirname(destino), "_MODELO-VSL")
-    if not os.path.isdir(modelo):
-        modelo = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", "projetos", "_MODELO-VSL")
     if os.path.exists(destino):
         print(f"✗ já existe: {destino}", file=sys.stderr)
         sys.exit(2)
-    shutil.copytree(modelo, destino, ignore=shutil.ignore_patterns(".gitkeep"))
+    campanhas = os.path.join(vsls.KIT, "2-design-system", "campanhas")
+    if a.campanha and not os.path.isdir(os.path.join(campanhas, a.campanha)):
+        print(f"✗ campanha '{a.campanha}' não existe (tem: {', '.join(sorted(os.listdir(campanhas)))})", file=sys.stderr)
+        sys.exit(2)
+    shutil.copytree(vsls.MODELO, destino, ignore=shutil.ignore_patterns(".gitkeep"))
     arq = os.path.join(destino, "config.json")
     cfg = json.load(open(arq, encoding="utf-8"))
     cfg["nome"] = a.nome or os.path.basename(destino)
     cfg["filmcraft"]["projeto"] = ""
+    if a.campanha:
+        cfg["motions"]["campanha"] = a.campanha
     json.dump(cfg, open(arq, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     exemplo = os.path.join(destino, "04-plano-de-cenas", "plano-de-cenas.md")
     os.replace(exemplo, os.path.join(destino, "04-plano-de-cenas", "EXEMPLO-plano-de-cenas.md"))
+    vsls.anotar(destino)
     print(f"✓ projeto criado: {destino}")
+    print(f"  campanha dos motions: {cfg['motions']['campanha']}")
     print("  falta preencher: config.json (projeto do FilmCraft, sequências, takes), 01-roteiro/teleprompter.txt,")
     print("  02-brutos e 03-b-rolls (ou atalhos para o Drive). O exemplo do plano ficou em 04-plano-de-cenas/EXEMPLO-plano-de-cenas.md")
+    drive = midia.letra_drive()
+    if drive and destino.upper().startswith(drive.upper()):
+        print(f"  ⚠ a pasta está no Google Drive ({drive}): os renders dos motions ficam lentos e podem falhar. Prefira um disco do computador.")
+
+
+def cmd_vsls(a):
+    if a.anotar:
+        print(f"✓ anotada: {vsls.anotar(a.anotar)}")
+    if a.tirar:
+        print(f"✓ tirada da lista (a pasta continua no disco): {vsls.tirar(a.tirar)}")
+    lista = vsls.todas()
+    if not lista:
+        print("nenhuma VSL neste computador ainda: crie com `nova`")
+    for nome, pasta, existe in lista:
+        print(f"  {'✓' if existe else '✗'} {nome:<28} {pasta}{'' if existe else '   (pasta não encontrada)'}")
 
 
 def cmd_abrir(proj, a):
@@ -159,7 +180,11 @@ def cmd_checar(proj, a):
 
 
 def cmd_reconectar(proj, a):
-    feitos, erros = midia.reconectar(FC(), a.prefixo)
+    prefixo = a.prefixo or midia.letra_drive()
+    if not prefixo:
+        print("✗ não achei o Google Drive neste computador: informe --prefixo com a letra (ex.: H:)", file=sys.stderr)
+        sys.exit(2)
+    feitos, erros = midia.reconectar(FC(), prefixo)
     print(f"✓ {len(feitos)} itens reconectados")
     for n, e in erros:
         print(f"  ✗ {n}: {e}")
@@ -175,12 +200,17 @@ def main(argv=None):
     for s in (sys.stdout, sys.stderr):              # saída redirecionada no Windows cai em cp1252 e não imprime ✓/✗
         s.reconfigure(encoding="utf-8", errors="replace")
     ap =argparse.ArgumentParser(prog="python -m stlflix", description="Ferramentas de edição de VSL STLFLIX no FilmCraft")
-    ap.add_argument("--projeto", help="pasta do projeto (com config.json), ex.: projetos/VSL-Shark")
+    ap.add_argument("--projeto", help="pasta da VSL (com config.json) ou só o nome dela, ex.: VSL-Shark ou D:/Edicao/VSL-Shark")
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("painel", help="página com as ferramentas instaladas e o que falta em cada VSL (não precisa de --projeto)")
     p.add_argument("--sem-abrir", action="store_true", help="só gera painel/index.html")
-    p = sub.add_parser("nova", help="cria a pasta da VSL a partir de projetos/_MODELO-VSL")
+    p = sub.add_parser("vsls", help="lista as VSLs deste computador (não precisa de --projeto)")
+    p.add_argument("--anotar", metavar="PASTA", help="põe na lista uma pasta de VSL que já existe (copiada de outro editor, por exemplo)")
+    p.add_argument("--tirar", metavar="VSL", help="tira da lista (não apaga a pasta)")
+    sub.add_parser("escolher-pasta", help="abre a janela do Windows para o editor escolher uma pasta e mostra o caminho")
+    p = sub.add_parser("nova", help="cria a pasta da VSL (no caminho de --projeto) a partir de projetos/_MODELO-VSL")
     p.add_argument("--nome", help="nome da VSL (padrão: o nome da pasta)")
+    p.add_argument("--campanha", help="pasta em 2-design-system/campanhas (padrão: a do modelo)")
     sub.add_parser("abrir", help="abre o FilmCraft com o controle ligado e o projeto do config")
     sub.add_parser("status", help="o que já está preenchido / gerado no projeto")
     p = sub.add_parser("transcrever", help="exporta o áudio da sequência, transcreve com Whisper e divide por blocos")
@@ -199,7 +229,7 @@ def main(argv=None):
     p.add_argument("sequencias", nargs="*")
     p.add_argument("--rapido", action="store_true", help="pula o teste de render (quadros pretos)")
     p = sub.add_parser("reconectar", help="reconecta a mídia do Drive no mesmo caminho (resolve MEDIA UNREADABLE)")
-    p.add_argument("--prefixo", default="G:")
+    p.add_argument("--prefixo", help="início do caminho da mídia a reconectar (padrão: a letra do Google Drive deste computador)")
     p = sub.add_parser("exportar-xml", help="exporta XML (FCP7) das sequências; versões anteriores vão para backup")
     p.add_argument("sequencias", nargs="*")
     p.add_argument("--destino")
@@ -209,12 +239,17 @@ def main(argv=None):
         saida, dados = painel.gerar(abrir=not a.sem_abrir)
         print(f"✓ painel: {saida} ({len(dados['projetos'])} VSLs)")
         return
-    if not a.projeto:
-        ap.error("informe --projeto projetos/<VSL>")
-    if a.cmd == "nova":
-        return cmd_nova(a)
+    if a.cmd == "escolher-pasta":
+        print(vsls.escolher_pasta() or "✗ nenhuma pasta escolhida")
+        return
     try:
-        proj = Projeto(a.projeto)
+        if a.cmd == "vsls":
+            return cmd_vsls(a)
+        if not a.projeto:
+            ap.error("informe --projeto <VSL> (o nome ou a pasta)")
+        if a.cmd == "nova":
+            return cmd_nova(a)
+        proj = Projeto(vsls.resolver(a.projeto))
         globals()["cmd_" + a.cmd.replace("-", "_")](proj, a)
     except (FileNotFoundError, KeyError, FilmCraftError) as e:
         print(f"✗ {e}", file=sys.stderr)

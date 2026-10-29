@@ -2,6 +2,16 @@
 
 Kit do time de edição da STLFLIX para VSLs 9:16. Junta a edição no **FilmCraft** (operado pelo canal de controle) com os **motions da marca** gerados no HyperFrames a partir do plano de cenas que o editor escreve. Quem conversa com você é um editor de vídeo: responda em **português do Brasil**, sem jargão de programação, e cite posições como timecode da timeline.
 
+## Qual VSL
+
+O kit serve para qualquer VSL de qualquer editor do time. Nenhuma VSL é a "padrão": não assuma a VSL-Shark nem a primeira da pasta.
+
+- **A pasta da VSL fica onde o editor quiser** no computador dele (não precisa estar dentro do kit). Tudo o que o kit gera para ela (motions, pasta de trabalho do HyperFrames, transcrições, exportações) vai para dentro dessa pasta. O kit anota o caminho de cada VSL em `%LOCALAPPDATA%\STLFLIX_EDITOR\vsls.json`, e `--projeto` aceita só o nome (`--projeto VSL-Ender-3`) ou o caminho.
+- Se o editor ainda não disse em qual VSL vai trabalhar e o pedido depende de uma, rode `./stlflix.cmd vsls` e pergunte qual é, com a opção **Criar uma VSL nova** (skill `nova-vsl`). Se não houver nenhuma, ofereça criar.
+- "Vamos trabalhar na VSL-X" (o pedido que o painel copia) fixa a VSL da conversa: use `--projeto VSL-X` até ele trocar.
+- Pasta de VSL que veio de outro lugar (copiada de outro editor, movida de disco): `./stlflix.cmd vsls --anotar "<pasta>"`. Se ele não souber o caminho, `./stlflix.cmd escolher-pasta` abre a janela do Windows para ele escolher.
+- O painel tem o mesmo menu (escolher VSL ou criar nova) e o botão para baixar o ArtCraft Launcher (https://getartcraft.com).
+
 ## Regras (sempre)
 
 - **Mostrar antes de mudar.** Todo comando que mexe no projeto do FilmCraft (`--aplicar`, ou qualquer chamada direta que altere a timeline) só roda depois de você mostrar o que vai mudar e o editor aprovar. O jeito comum de aprovar é "Coloque…" / "Pode aplicar".
@@ -16,11 +26,11 @@ Kit do time de edição da STLFLIX para VSLs 9:16. Junta a edição no **FilmCra
 
 ## Como rodar
 
-Sempre a partir da **raiz do kit** (a pasta deste arquivo). Os projetos ficam em `projetos/<VSL>/`.
+Sempre a partir da **raiz do kit** (a pasta deste arquivo). `<VSL>` é o nome da VSL ou o caminho da pasta dela.
 
 ```
-./stlflix.cmd --projeto projetos/<VSL> <comando>          edição (Python, FilmCraft)
-node 3-motions/motions.mjs <comando> --projeto projetos/<VSL>   motions (HyperFrames)
+./stlflix.cmd --projeto <VSL> <comando>          edição (Python, FilmCraft)
+node 3-motions/motions.mjs <comando> --projeto <VSL>   motions (HyperFrames)
 powershell -ExecutionPolicy Bypass -File 1-instalacao/instalar.ps1 [-Verificar]
 ```
 
@@ -28,8 +38,10 @@ powershell -ExecutionPolicy Bypass -File 1-instalacao/instalar.ps1 [-Verificar]
 
 | `stlflix` | O que faz | Muda o projeto? |
 |---|---|---|
-| `painel` (sem `--projeto`) | Gera e abre `painel/index.html`: ferramentas instaladas, o que falta em cada VSL e o próximo passo | não |
-| `nova [--nome X]` | Cria `projetos/<VSL>` a partir de `projetos/_MODELO-VSL` | não |
+| `painel` (sem `--projeto`) | Gera e abre `painel/index.html`: menu para escolher ou criar a VSL, ferramentas instaladas (com o botão do ArtCraft), o que falta na VSL escolhida e o próximo passo | não |
+| `vsls [--anotar PASTA] [--tirar VSL]` (sem `--projeto`) | Lista as VSLs deste computador e onde estão; anota uma pasta que já existe ou tira da lista (sem apagar) | não |
+| `escolher-pasta` | Abre a janela "Escolher pasta" do Windows e mostra o caminho escolhido | não |
+| `nova [--nome X] [--campanha bf26]` | Cria a pasta `--projeto` (caminho completo, onde o editor quiser) a partir de `projetos/_MODELO-VSL` e anota a VSL | não |
 | `abrir` | Abre o FilmCraft com o controle ligado e o `.fcproj` do config | não |
 | `status` | O que já está preenchido e gerado | não |
 | `transcrever <seq>` | Áudio da sequência → Whisper → documento por blocos em `06-transcricoes` | não |
@@ -38,7 +50,7 @@ powershell -ExecutionPolicy Bypass -File 1-instalacao/instalar.ps1 [-Verificar]
 | `motions <seq> [--aplicar]` | Mostra o encaixe dos motions nas frases-gatilho; `--aplicar` coloca na V2 | **com --aplicar** |
 | `enquadrar [seqs] [--aplicar]` | Escala e âncora padrão nos takes da câmera | **com --aplicar** |
 | `checar [seqs] [--rapido]` | Checagens antes de exportar | não |
-| `reconectar` | Resolve o "MEDIA UNREADABLE" do Drive (G:) | só os links |
+| `reconectar` | Resolve o "MEDIA UNREADABLE" do Drive (acha a letra do Drive sozinho; G: na maioria das máquinas) | só os links |
 | `exportar-xml [seqs] [--destino]` | XML FCP7 para o Drive, guardando o anterior | não |
 
 | `motions.mjs` | O que faz |

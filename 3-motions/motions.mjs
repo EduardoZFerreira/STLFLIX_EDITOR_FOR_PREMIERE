@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 // Motions STLFLIX 9:16: do plano-de-cenas.md aos .mov transparentes (HyperFrames).
 //
-//   node 3-motions/motions.mjs validar --projeto projetos/<VSL> [--plano corpo]
-//   node 3-motions/motions.mjs gerar   --projeto projetos/<VSL> [--plano corpo]          → pasta de trabalho do HyperFrames
-//   node 3-motions/motions.mjs previa  --projeto projetos/<VSL> [--plano corpo]          → abre o Studio do HyperFrames
-//   node 3-motions/motions.mjs render  --projeto projetos/<VSL> [--plano corpo] [--so B05H,B05I] [--por-parte 30]
+//   node 3-motions/motions.mjs validar --projeto <VSL> [--plano corpo]
+//   node 3-motions/motions.mjs gerar   --projeto <VSL> [--plano corpo]          → pasta de trabalho do HyperFrames
+//   node 3-motions/motions.mjs previa  --projeto <VSL> [--plano corpo]          → abre o Studio do HyperFrames
+//   node 3-motions/motions.mjs render  --projeto <VSL> [--plano corpo] [--so B05H,B05I] [--por-parte 30]
 //   (o modelo visual vem de motions.modelo no config.json; padrão "shark-vsl" → 3-motions/modelos/shark-vsl)
 //   node 3-motions/motions.mjs migrar  --build <build.mjs antigo> --gatilhos <plano com frases> --saida <plano.md>
 //
 // O render sai em <projeto>/<pastas.motions> (um .mov por cena + LEIAME.txt) e a prévia sobre o quadro de
 // referência em <pasta de trabalho>/renders/previa-cenas.mp4.
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -25,6 +26,23 @@ function args() {
   const o = { cmd };
   for (let i = 0; i < r.length; i++) if (r[i].startsWith("--")) o[r[i].slice(2)] = r[i + 1] && !r[i + 1].startsWith("--") ? r[++i] : true;
   return o;
+}
+
+// --projeto aceita a pasta da VSL ou só o nome dela: as VSLs ficam onde o editor quiser e o kit anota o caminho
+// em %LOCALAPPDATA%\STLFLIX_EDITOR\vsls.json (a mesma lista do stlflix, em 4-filmcraft/stlflix/vsls.py).
+function resolverVsl(arg) {
+  if (fs.existsSync(path.join(arg, "config.json"))) return arg;
+  const lista = path.join(process.env.LOCALAPPDATA || os.homedir(), "STLFLIX_EDITOR", "vsls.json");
+  let anotadas = [];
+  try { anotadas = JSON.parse(fs.readFileSync(lista, "utf8")); } catch {}
+  const dentro = path.join(KIT, "projetos");
+  const doKit = fs.existsSync(dentro) ? fs.readdirSync(dentro).filter((n) => !/^[_.]/.test(n)).map((n) => path.join(dentro, n)) : [];
+  const nome = path.basename(path.normalize(arg.trim())).toLowerCase();
+  const achadas = [...new Set([...anotadas, ...doKit].map((p) => path.resolve(p)))]
+    .filter((p) => path.basename(p).toLowerCase() === nome && fs.existsSync(path.join(p, "config.json")));
+  if (achadas.length === 1) return achadas[0];
+  if (achadas.length > 1) throw new Error(`há ${achadas.length} VSLs chamadas "${arg}": use o caminho (${achadas.join("; ")})`);
+  throw new Error(`não achei a VSL "${arg}": use o caminho da pasta`);
 }
 
 function projeto(pasta) {
@@ -46,6 +64,7 @@ function planoDe(proj, chave) {
 }
 
 function cenasDoPlano(arquivo) {
+  if (!fs.existsSync(arquivo)) throw new Error(`ainda não existe o plano de cenas: ${arquivo} (tem um exemplo na mesma pasta)`);
   const { cenas, erros } = lerPlano(fs.readFileSync(arquivo, "utf8"));
   const geraveis = cenas.filter((c) => c.cena).map((c) => c.cena);
   return { todas: cenas, geraveis, erros };
@@ -173,8 +192,8 @@ function migrar(o) {
 async function main() {
   const o = args();
   if (o.cmd === "migrar") return migrar(o);
-  if (!o.projeto) throw new Error("use --projeto projetos/<VSL>");
-  const proj = projeto(o.projeto);
+  if (!o.projeto) throw new Error("use --projeto <VSL> (o nome ou a pasta)");
+  const proj = projeto(resolverVsl(o.projeto));
   const { chave, arquivo } = planoDe(proj, o.plano);
   const { todas, geraveis, erros } = cenasDoPlano(arquivo);
   if (o.cmd === "validar" || erros.length) {
