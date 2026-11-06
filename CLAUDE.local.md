@@ -19,7 +19,7 @@ O Python do kit não fala com o Premiere: **quem opera o Premiere é você**, pe
 ./premiere.cmd --projeto <VSL> entregar-xml <arquivo.xml>... [--destino pasta]
 ```
 
-**Rode o `premiere.cmd` (e o `stlflix.cmd`) pelo PowerShell** (`.\premiere.cmd …`): o kit está numa pasta com espaço ("Editor JP"), e pelo Git Bash o `cmd` do Windows quebra o caminho quando algum argumento tem aspas.
+**Clone o kit numa pasta sem espaço no caminho** (ex.: `C:\Users\<você>\Desktop\Dev\STLFLIX_EDITOR_FOR_PREMIERE`). Com espaço (ex.: "Editor JP"), o `cmd` do Windows quebra o `premiere.cmd` e o `stlflix.cmd` quando rodam pelo Git Bash; o PowerShell funciona nos dois casos. Sem espaço, qualquer terminal serve.
 
 Nenhum desses comandos muda o projeto do Premiere: eles só leem e escrevem arquivos. Quem muda o projeto são as ferramentas do conector, e **a regra "mostrar antes de mudar" continua valendo para elas**: mostre o que vai mudar e espere o editor aprovar antes de qualquer `import_fcp_xml`, `overwrite_clip`, `set_clip_*`, `relink_media`, `remove_from_timeline` etc.
 
