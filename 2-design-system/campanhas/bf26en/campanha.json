@@ -1,0 +1,17 @@
+{
+  "nome": "Black November 2026 (EN)",
+  "logo": {
+    "arquivo": "logo-kv.png",
+    "texto": "Black November · Infinite possibilities to make a living from 3D printing"
+  },
+  "cores": {
+    "degrade": [
+      "#8DFB5E",
+      "#2EE6A6",
+      "#22C7F0",
+      "#2F7BFF"
+    ],
+    "barra": "#2F7BFF",
+    "brilho": "#07EF2D"
+  }
+}

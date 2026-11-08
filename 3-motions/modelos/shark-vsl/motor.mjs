@@ -221,15 +221,15 @@ __ROOT__ { position: absolute; inset: 0; overflow: hidden; font-family: var(--fo
 .dot { display: block; width: 26px; height: 26px; border-radius: 50%; border: 3px solid rgba(246,250,254,.8); }
 .cta { display: flex; flex-direction: column; align-items: center; gap: 18px; }
 .btn { display: inline-block; padding: 30px 64px; border-radius: 999px; background: var(--grad-title); color: #0d0e14; font: 700 54px/1 var(--font-title); letter-spacing: -.01em; text-shadow: none;
-  box-shadow: 0 14px 40px rgba(184,242,60,.35), 0 6px 18px rgba(0,0,0,.4); }
+  box-shadow: 0 6px 18px rgba(0,0,0,.4); }   /* sem glow colorido: o brilho grande dava banding no degradê */
 .down { font: 700 64px/1 var(--font-body); color: var(--cta); }
 /* ── efeitos da Black (cenas fx) ── */
 .shine, .tri { display: none; }
 .fx .num.lime { position: relative; }
 .fx .down { display: none; }
 .fx .tri { display: block; width: 0; height: 0; border-left: 44px solid transparent; border-right: 44px solid transparent; border-top: 56px solid ${COR2};
-  filter: drop-shadow(0 0 16px rgba(${rgb(COR2)},.7)) drop-shadow(0 3px 8px rgba(0,0,0,.5)); }
-.fx .btn { position: relative; overflow: hidden; box-shadow: 0 0 36px rgba(${rgb(COR2)},.5), 0 0 90px rgba(${rgb(COR3)},.25), 0 6px 18px rgba(0,0,0,.4); }
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,.5)); }
+.fx .btn { position: relative; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,.4); }
 .fx .shine { display: block; position: absolute; top: -40%; bottom: -40%; left: -40%; width: 30%; transform: skewX(-22deg);
   background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.85), rgba(255,255,255,0)); }
 .dust { position: absolute; left: -${BAND.side}px; top: -110px; width: ${W}px; height: 600px; pointer-events: none; }
@@ -311,7 +311,19 @@ const RUNTIME = `
   });
   // tracking-in em todo título pequeno: as letras chegam afastadas e se aproximam até o espaçamento final, subindo de leve
   q(".kicker.hf-tracking-in").forEach(function (kk) {
-    tl.fromTo(kk, { opacity: 0, y: 10, "--hf-tracking-value": "0.6em" }, { opacity: 1, y: 0, "--hf-tracking-value": "0.16em", duration: 0.9, ease: "power3.out" }, kk.hasAttribute("data-at") ? at(kk) : 0.3);
+    // trava as quebras de linha como ficam no espaçamento final: sem isso, o texto reflui enquanto o espaçamento diminui
+    kk.style.setProperty("--hf-tracking-value", "0.16em");
+    var pal = kk.textContent.split(" ").filter(Boolean), linhas = [], topo = null;
+    kk.textContent = "";
+    pal.forEach(function (w, i) { var s = document.createElement("span"); s.textContent = w; s.style.display = "inline"; kk.appendChild(s); if (i < pal.length - 1) kk.appendChild(document.createTextNode(" ")); });
+    var spans = kk.querySelectorAll("span");
+    spans.forEach(function (s, i) { if (s.offsetTop !== topo) { linhas.push([]); topo = s.offsetTop; } linhas[linhas.length - 1].push(pal[i]); });
+    kk.textContent = "";
+    var maxCh = 1, larg = 0;
+    linhas.forEach(function (l) { var d = document.createElement("span"); d.style.cssText = "display:block;white-space:nowrap"; d.textContent = l.join(" "); kk.appendChild(d); maxCh = Math.max(maxCh, d.textContent.length); });
+    for (var c = 0; c < kk.children.length; c++) larg = Math.max(larg, kk.children[c].getBoundingClientRect().width);
+    var ini = Math.max(0.16, Math.min(0.6, 0.16 + (940 - larg) / (maxCh * parseFloat(getComputedStyle(kk).fontSize))));   // a linha mais larga nunca passa da tela
+    tl.fromTo(kk, { opacity: 0, y: 10, "--hf-tracking-value": ini + "em" }, { opacity: 1, y: 0, "--hf-tracking-value": "0.16em", duration: 0.9, ease: "power3.out" }, kk.hasAttribute("data-at") ? at(kk) : 0.3);
   });
   q(".it").forEach(function (el) { tl.fromTo(el, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, at(el)); });
   q(".cnt").forEach(function (el) {
