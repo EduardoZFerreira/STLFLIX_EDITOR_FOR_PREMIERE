@@ -1,4 +1,4 @@
-"""Versão LOCAL do kit (só nesta máquina, fora do git): Premiere Pro no lugar do FilmCraft.
+"""Kit STLFLIX com o Premiere Pro no lugar do FilmCraft (versão do fork EduardoZFerreira/STLFLIX_EDITOR_FOR_PREMIERE).
 
 O Python não fala com o Premiere. Quem opera o Premiere é o Claude, pelo conector MCP (ferramentas mcp__premiere-pro__*).
 A troca entre os dois é por arquivos:
@@ -9,6 +9,7 @@ A troca entre os dois é por arquivos:
   como uma sequência NOVA; os motions viram uma lista JSON que o Claude coloca com o conector.
 
     premiere.cmd --projeto <VSL> decupar <seq> --ref <sequencia.xml> [--escala 50] [--nome "Corpo decupado"]
+    premiere.cmd --projeto <VSL> conferir <seq> [--plano arquivo] [--fps 29.97]
     premiere.cmd --projeto <VSL> transcrever <seq> --xml <sequencia.xml> --wav <mix.wav>
     premiere.cmd --projeto <VSL> motions <seq> --ref <sequencia.xml> [--plano arquivo]
     premiere.cmd --projeto <VSL> checar --xml <sequencia.xml> [--xml outra.xml]
@@ -32,6 +33,83 @@ from . import blocos, decupagem, motions, vsls
 from .audio import trechos_mudos
 from .projeto import Projeto
 from .tempo import T, mmss, tc
+
+_PALAVRAS = {}                                   # id(máscara de fala) -> palavras do take (para o refinar achar a palavra do corte)
+_energia_original = decupagem.energia
+
+
+def _energia_com_palavras(wav):
+    r = _energia_original(wav)
+    js = os.path.splitext(wav)[0] + ".json"
+    if os.path.exists(js):
+        _PALAVRAS[id(r[0])] = json.load(open(js, encoding="utf-8"))["words"]
+    return r
+
+
+def refinar_sem_cortar_palavra(md, a, b, quadro_fps):
+    """Troca o `decupagem.refinar` do kit: o corte acompanha a palavra, não o tempo do Whisper.
+
+    O Whisper marca o fim das palavras cedo, e o refinar original travava o clipe nesse fim (min(b, …)): a última
+    palavra saía cortada ao meio. Aqui, o fim vai até o fim real da última palavra do trecho (anda enquanto houver
+    fala, sem entrar na palavra seguinte) e o começo volta até o início real da primeira palavra (sem entrar na
+    palavra anterior)."""
+    import numpy as np
+    fala, db = md
+    pal = _PALAVRAS.get(id(fala), [])
+    n = len(fala)
+    avisos = []
+    ia, ib = int(round(a * 100)), int(round(b * 100))
+    if fala[ia:ia + 3].any():                                  # começo no meio da fala
+        ant = [w for w in pal if w["start"] < a - 0.02]
+        piso = max(ia - 40, int(round(ant[-1]["end"] * 100))) if ant else max(0, ia - 40)
+        k = ia
+        while k > piso and fala[max(0, k - 3):k].any():
+            k -= 1
+        if k != ia:
+            avisos.append(f"o começo caía na fala: movido de {mmss(a)} para {mmss(k / 100)}")
+        a, ia = k / 100, k
+    if fala[max(0, ib - 3):ib + 3].any():                      # fim no meio da fala
+        dentro = [w for w in pal if w["start"] <= b - 0.02]
+        prox = [w for w in pal if w["start"] > b - 0.02]
+        teto = min(n, ib + 100)
+        if prox:
+            teto = min(teto, int(round(prox[0]["start"] * 100)) - 3)
+        ult_fim = int(round(dentro[-1]["end"] * 100)) if dentro else ib
+        k = max(ib, min(ult_fim, teto))
+        while k < teto and fala[k:k + 4].any():
+            k += 1
+        if k != ib:
+            avisos.append(f"o fim caía na fala: movido de {mmss(b)} para {mmss(k / 100)}")
+        b, ib = k / 100, k
+    b_lim = b + decupagem.CAUDA_Q / quadro_fps
+    seguinte = [w for w in pal if w["start"] > b - 0.02]
+    if seguinte:                                              # a cauda não entra na palavra seguinte
+        b_lim = min(b_lim, max(b, seguinte[0]["start"] - 0.02))
+    idx = np.flatnonzero(fala[ia:ib])
+    if idx.size == 0:
+        return [], ["sem fala no trecho"]
+    ilhas, s0, ant = [], idx[0], idx[0]
+    for k in idx[1:]:
+        if (k - ant) / 100 >= 0.10:
+            ilhas.append((s0, ant + 1))
+            s0 = k
+        ant = k
+    ilhas.append((s0, ant + 1))
+    ilhas = [(ia + x, ia + y) for x, y in ilhas if y - x >= 6]
+    clipes = []
+    for on, off in ilhas:
+        ini = max(a, on / 100 - decupagem.CABECA_Q / quadro_fps)
+        fim = min(b_lim, off / 100 + decupagem.CAUDA_Q / quadro_fps)
+        if clipes and ini - clipes[-1][1] < decupagem.PAUSA_MIN:
+            clipes[-1] = (clipes[-1][0], fim)
+        else:
+            clipes.append((ini, fim))
+    return clipes, avisos
+
+
+decupagem.energia = _energia_com_palavras
+decupagem.refinar = refinar_sem_cortar_palavra
+
 
 CROSSFADE = ("Cross Fade (+3dB)", "KGAudioTransCrossFade3dB")      # o Constant Power do Premiere
 
@@ -469,6 +547,54 @@ def cmd_entregar_xml(proj, a):
         print("  ✓", final)
 
 
+def cmd_conferir(proj, a):
+    """Transcreve cada clipe planejado SOZINHO (áudio curto) e mostra o que cada um realmente contém.
+
+    O Whisper do take inteiro funde repetições ("Eu gostaria de… Eu gostaria de um prato" vira uma frase só) e às
+    vezes perde frases inteiras; transcrito um por um, os falsos começos, as palavras repetidas e os cortes no meio de
+    palavra aparecem. Serve para conferir a decupagem antes de importar no Premiere (não muda nada no projeto)."""
+    import wave
+    import numpy as np
+    from .transcrever import _carregar
+    clipes, _, erros = decupagem.planejar(proj, a.sequencia, a.plano, a.fps)
+    if erros:
+        raise ValueError("a decupagem tem erros (rode 'decupar' para ver): " + "; ".join(erros))
+    pasta = decupagem.pasta_brutos(proj)
+    modelo, _ = _carregar(proj["transcricao"]["modelo"])
+    audios, saida, avisos_total = {}, [], 0
+    prompt = "Eh... eu gostaria de... eu gostaria de um prato. É, é isso, é isso que eu quero."
+
+    def texto_de(c):
+        if c["take"] not in audios:
+            with wave.open(os.path.join(pasta, c["take"] + ".wav"), "rb") as w:
+                audios[c["take"]] = np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(np.float32) / 32768.0
+        x = audios[c["take"]]
+        a0, b0 = max(0.0, c["a"] - 0.25), c["b"] + 0.4
+        segs, _ = modelo.transcribe(x[int(a0 * 16000):int(b0 * 16000)], language="pt", word_timestamps=False, vad_filter=False,
+                                    condition_on_previous_text=False, initial_prompt=prompt, beam_size=5, temperature=0)
+        return " ".join(s.text.strip() for s in segs).strip()
+
+    palavras = lambda t: re.findall(r"\w+", t.lower())
+    textos = [texto_de(c) for c in clipes]
+    for i, c in enumerate(clipes):
+        ps, flags = palavras(textos[i]), []
+        dur = c["b"] - c["a"]
+        if len(ps) <= 3 and dur < 1.5:
+            flags.append("fragmento curto: tropeço ou conversa de set?")
+        if i + 1 < len(clipes) and clipes[i + 1]["take"] == c["take"]:
+            pn = palavras(textos[i + 1])
+            if len(ps) >= 2 and len(pn) >= 2 and (ps[-2:] == pn[:2] or ps[:min(3, len(ps))] == pn[:min(3, len(ps))]):
+                flags.append("repete o começo do próximo clipe: falso começo?")
+        saida.append(f"{i:3d}  {c['take']} {mmss(c['a'])}-{mmss(c['b'])}  {textos[i]}" + "".join(f"\n       ⚠ {f}" for f in flags))
+        avisos_total += len(flags)
+    texto = "\n".join(saida)
+    arq = os.path.join(proj.pasta_de("transcricoes"), f"conferencia-{proj.chave(a.sequencia)}.md")
+    open(arq, "w", encoding="utf-8").write(f"# Conferência clipe a clipe — {a.sequencia}\n\nCada linha é um clipe transcrito sozinho. "
+                                           f"Procure falsos começos, palavras repetidas e frases que terminam cortadas.\n\n```\n{texto}\n```\n")
+    print(texto)
+    print(f"\n{len(clipes)} clipes conferidos · {avisos_total} avisos · {arq}")
+
+
 def main(argv=None):
     for s in (sys.stdout, sys.stderr):
         s.reconfigure(encoding="utf-8", errors="replace")
@@ -488,6 +614,10 @@ def main(argv=None):
     p.add_argument("--nome", help="nome da sequência nova (padrão: '<sequência> (decupagem dd-mm HHhMM)')")
     p.add_argument("--escala", type=float, help="escala do Movimento nos takes (ex.: 50 para bruto 4K numa sequência 1080x1920)")
     ref(p)
+    p = sub.add_parser("conferir", help="transcreve cada clipe da decupagem sozinho: acha falsos começos, repetições e cortes no meio da palavra")
+    p.add_argument("sequencia")
+    p.add_argument("--plano", help="outro arquivo de decupagem")
+    p.add_argument("--fps", type=float, default=29.97, help="fps da sequência (padrão 29,97)")
     p = sub.add_parser("transcrever", help="transcreve uma sequência a partir do XML e do WAV exportados pelo Premiere")
     p.add_argument("sequencia")
     p.add_argument("--xml", required=True)
