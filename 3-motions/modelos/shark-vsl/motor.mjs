@@ -164,10 +164,10 @@ __ROOT__ { position: absolute; inset: 0; overflow: hidden; font-family: var(--fo
 .imp + .label { margin-top: 30px; }
 .imp .kw { position: relative; display: inline-block; }
 .imp .circ, .imp .ca-ink { position: absolute; overflow: visible; pointer-events: none; }
-.imp .ca-ink path { filter: drop-shadow(0 0 8px rgba(255,255,255,.4)) drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
+.imp .ca-ink path { filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
 .imp .ca-pen { position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: none; filter: drop-shadow(0 6px 10px rgba(0,0,0,.45)); }
 .imp .circ path { fill: none; stroke: var(--cta); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1;
-  filter: drop-shadow(0 0 8px rgba(184,242,60,.6)); }
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
 /* palavra-chave da frase de impacto: camada branca por cima do gradiente, que some (--branco 1 → 0) */
 /* frase-tese: Sora variável, começa fina e ganha peso */
 @font-face { font-family: "Plus Jakarta Sans"; src: url("fx/plus-jakarta-sans-variable-latin.woff2") format("woff2"); font-weight: 200 800; font-display: block; }   /* guia BF26: título de impacto */
@@ -183,7 +183,7 @@ __ROOT__ { position: absolute; inset: 0; overflow: hidden; font-family: var(--fo
 .tx { position: relative; display: inline-block; }
 .num { white-space: nowrap; font-weight: 700; color: var(--text); letter-spacing: -.04em; line-height: .95; font-variant-numeric: tabular-nums; }
 .num.lime { background: ${NUM_BG}; -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none;
-  filter: drop-shadow(0 0 18px rgba(${rgb(RES[1] || RES[0])},.35)) drop-shadow(0 2px 12px rgba(0,0,0,.45)); }
+  filter: drop-shadow(0 2px 12px rgba(0,0,0,.45)); }   /* sem glow colorido: as bordas ficavam marcadas */
 .num.lime .cnt { background: inherit; -webkit-background-clip: text; background-clip: text; }
 .n-lg { font-size: 160px; } .n-md { font-size: 116px; }
 .neg { color: var(--no); }
@@ -238,7 +238,7 @@ __ROOT__ { position: absolute; inset: 0; overflow: hidden; font-family: var(--fo
 .ico { position: relative; display: flex; justify-content: center; align-items: flex-end; flex: 0 0 auto; }
 .ico img { height: 100%; width: auto; display: block; position: relative; z-index: 1; filter: drop-shadow(0 10px 14px rgba(0,0,0,.45)); }
 .ico::after { content: ""; position: absolute; left: 50%; bottom: -4%; width: 72%; height: 16%; transform: translateX(-50%); z-index: 0;
-  background: radial-gradient(ellipse at center, rgba(${rgb(CAMP.cores.brilho)},.5), rgba(${rgb(CAMP.cores.brilho)},0) 70%); filter: blur(6px); }
+  background: radial-gradient(ellipse at center, rgba(${rgb(CAMP.cores.brilho)},.5), rgba(${rgb(CAMP.cores.brilho)},0) 70%); filter: blur(6px); display: none; }   /* brilho verde desligado: sem glow colorido */
 .icos { display: flex; justify-content: center; align-items: flex-end; gap: 28px; margin-top: 10px; }
 .logo img { display: block; height: auto; filter: drop-shadow(0 16px 26px rgba(0,0,0,.5)); }
 .x3d { display: flex; flex-direction: column; align-items: center; gap: 0; }
@@ -246,9 +246,9 @@ __ROOT__ { position: absolute; inset: 0; overflow: hidden; font-family: var(--fo
 .xl .xf { position: relative; z-index: 1; display: block; }
 .xl::before { content: attr(data-t); position: absolute; left: 0; right: 0; top: 0; text-align: center; z-index: 0; }   /* extrusão: pseudo-elemento atrás da face */
 .xl .xf { -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
-.xl-azul::before { color: #1a56d6; text-shadow: 0 1px 0 #1a56d6, 0 2px 0 #1951cc, 0 3px 0 #174cc1, 0 4px 0 #1647b7, 0 5px 0 #1442ac, 0 6px 0 #133da2, 0 7px 0 #123898, 0 8px 0 #10348d, 0 9px 0 #0f2f83, 0 10px 0 #0e2a79, 0 11px 0 #0c256e, 0 12px 0 #0b2064, 0 13px 0 #091b59, 0 14px 0 #08164f, 0 22px 22px rgba(0,0,0,.55), 0 0 60px rgba(46,139,255,.5); }
+.xl-azul::before { color: #1a56d6; text-shadow: 0 1px 0 #1a56d6, 0 2px 0 #1951cc, 0 3px 0 #174cc1, 0 4px 0 #1647b7, 0 5px 0 #1442ac, 0 6px 0 #133da2, 0 7px 0 #123898, 0 8px 0 #10348d, 0 9px 0 #0f2f83, 0 10px 0 #0e2a79, 0 11px 0 #0c256e, 0 12px 0 #0b2064, 0 13px 0 #091b59, 0 14px 0 #08164f, 0 22px 22px rgba(0,0,0,.55); }
 .xl-azul .xf { background-image: linear-gradient(180deg, #b8f6ff 0%, #5fd6ff 26%, #2f9bff 58%, #1f62ec 100%); }
-.xl-verde::before { color: #11a83a; text-shadow: 0 1px 0 #11a83a, 0 2px 0 #10a038, 0 3px 0 #0f9835, 0 4px 0 #0e9133, 0 5px 0 #0d8930, 0 6px 0 #0c812e, 0 7px 0 #0b792b, 0 8px 0 #0a7229, 0 9px 0 #096a26, 0 10px 0 #086224, 0 11px 0 #075a21, 0 12px 0 #06531f, 0 13px 0 #054b1c, 0 14px 0 #04431a, 0 22px 22px rgba(0,0,0,.55), 0 0 60px rgba(7,239,45,.42); }
+.xl-verde::before { color: #11a83a; text-shadow: 0 1px 0 #11a83a, 0 2px 0 #10a038, 0 3px 0 #0f9835, 0 4px 0 #0e9133, 0 5px 0 #0d8930, 0 6px 0 #0c812e, 0 7px 0 #0b792b, 0 8px 0 #0a7229, 0 9px 0 #096a26, 0 10px 0 #086224, 0 11px 0 #075a21, 0 12px 0 #06531f, 0 13px 0 #054b1c, 0 14px 0 #04431a, 0 22px 22px rgba(0,0,0,.55); }
 .xl-verde .xf { background-image: linear-gradient(180deg, #e2ff9e 0%, #8ff76a 26%, #2fe84f 58%, #0fbf3c 100%); }
 `;
 
